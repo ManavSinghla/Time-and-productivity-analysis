@@ -4,6 +4,9 @@ import Task from "../models/task.js";
 // @route  POST /api/tasks
 export const createTask = async (req, res) => {
     try {
+        // Just trying to debug request data as post not working
+        // console.log("HEADERS:", req.headers);
+        // console.log("BODY:", req.body);
         const { title, description, timeSpent, category, date } = req.body;
 
         if (!title || !timeSpent) {
