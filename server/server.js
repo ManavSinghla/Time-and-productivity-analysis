@@ -1,17 +1,21 @@
-import express from 'express';
+import express from "express";
+import dotenv from "dotenv";
+import connectDB from "./config/db.js";
+import taskRoutes from "./routes/taskRoutes.js";
 
-const app=express();
-const port=5000;
+dotenv.config();
 
-// Middleware
+const app = express();
 app.use(express.json());
 
-// Starting server
-app.listen(port,()=>{
-    console.log(`Server running on http://localhost:${port}`);
-})
-
-// Testing Server
-app.get("/",(req,res)=>{
+app.get("/", (req, res) => {
     res.send("Server is running fine");
-})
+});
+
+connectDB();
+
+app.use("/api/tasks", taskRoutes);
+
+app.listen(5000, () => {
+    console.log("Server running on http://localhost:5000");
+});
