@@ -1,0 +1,12 @@
+# Ignore Node.js dependencies
+node_modules/
+
+# Also ignore nested node_modules in subprojects
+**/node_modules/
+
+# Optional: common Node.js artifacts
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
