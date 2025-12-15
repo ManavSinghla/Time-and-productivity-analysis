@@ -12,3 +12,7 @@ export const fetchDailyAnalytics = async () => {
   const res = await fetch("http://localhost:5000/api/analytics/daily");
   return res.json();
 };
+export const fetchWeeklyAnalytics = async () => {
+  const res = await fetch("http://localhost:5000/api/analytics/weekly");
+  return res.json();
+};

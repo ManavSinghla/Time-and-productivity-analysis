@@ -1,21 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  fetchTodayTotal,
-  fetchCategoryAnalytics,
-  fetchDailyAnalytics,
-} from "../services/analyticsService";
-
-import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics } from "../services/analyticsService";
+import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -28,6 +13,11 @@ function AnalyticsDashboard() {
     fetchTodayTotal().then((data) => setTodayTotal(data.totalTime));
     fetchCategoryAnalytics().then((data) => setCategoryData(data));
     fetchDailyAnalytics().then((data) => setDailyData(data));
+  }, []);
+  
+  const [weeklyData, setWeeklyData] = useState([]);
+  useEffect(() => {
+    fetchWeeklyAnalytics().then((data) => setWeeklyData(data));
   }, []);
 
   return (
@@ -69,6 +59,17 @@ function AnalyticsDashboard() {
           <Tooltip />
           <Bar dataKey="totalTime" />
         </BarChart>
+      </ResponsiveContainer>
+
+      {/* WEEKLY LINE CHART */}
+      <h3>Weekly Productivity Trend</h3>
+      <ResponsiveContainer width="100%" height={300}>
+        <LineChart data={weeklyData}>
+          <XAxis dataKey="_id" />
+          <YAxis />
+          <Tooltip />
+          <Line type="monotone" dataKey="totalTime" />
+        </LineChart>
       </ResponsiveContainer>
     </div>
   );
