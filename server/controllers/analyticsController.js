@@ -30,3 +30,20 @@ export const getTimeByCategory = async (req, res) => {
     ]);
     res.json(result);
 };
+
+// @desc   Daily summary
+// @route  GET /api/analytics/daily
+export const getDailySummary = async (req, res) => {
+    const summary = await Task.aggregate([
+        {
+            $group: {
+                _id: {
+                    $dateToString: { format: "%Y-%m-%d", date: "$date" }
+                },
+                totalTime: { $sum: "$timeSpent" }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+    res.json(summary);
+};
