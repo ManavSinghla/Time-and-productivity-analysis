@@ -47,3 +47,38 @@ export const getDailySummary = async (req, res) => {
     ]);
     res.json(summary);
 };
+
+// @desc   Weekly productivity summary (last 7 days)
+// @route  GET /api/analytics/weekly
+export const getWeeklySummary = async (req, res) => {
+    try {
+        const today = new Date();
+        const lastWeek = new Date();
+        lastWeek.setDate(today.getDate() - 6);
+        lastWeek.setHours(0, 0, 0, 0);
+
+        const weeklyData = await Task.aggregate([
+            {
+                $match: {
+                    date: { $gte: lastWeek, $lte: today }
+                }
+            },
+            {
+                $group: {
+                    _id: {
+                        $dateToString: {
+                            format: "%Y-%m-%d",
+                            date: "$date"
+                        }
+                    },
+                    totalTime: { $sum: "$timeSpent" }
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        res.json(weeklyData);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
