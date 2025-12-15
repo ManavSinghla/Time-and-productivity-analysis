@@ -17,7 +17,6 @@ app.get("/", (req, res) => {
 
 connectDB();
 
-// Get also working fine 
 app.use("/api/tasks", taskRoutes);
 
 app.listen(5000, () => {
