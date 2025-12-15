@@ -1,7 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-import taskRoutes from "./routes/taskRoutes.js";
 import cors from "cors";
 
 
@@ -17,9 +16,12 @@ app.get("/", (req, res) => {
 
 connectDB();
 
-app.use("/api/tasks", taskRoutes);
-
 app.listen(5000, () => {
     console.log("Server running on http://localhost:5000");
 });
 
+import taskRoutes from "./routes/taskRoutes.js";
+app.use("/api/tasks", taskRoutes);
+
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+app.use("/api/analytics", analyticsRoutes);
