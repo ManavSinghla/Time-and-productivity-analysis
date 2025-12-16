@@ -16,3 +16,7 @@ export const fetchWeeklyAnalytics = async () => {
   const res = await fetch("http://localhost:5000/api/analytics/weekly");
   return res.json();
 };
+export const fetchProductivityScore = async () => {
+  const res = await fetch("http://localhost:5000/api/analytics/productivity");
+  return res.json();
+};
