@@ -25,3 +25,6 @@ app.use("/api/tasks", taskRoutes);
 
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 app.use("/api/analytics", analyticsRoutes);
+
+import authRoutes from "./routes/authRoutes.js";
+app.use("/api/auth", authRoutes);
