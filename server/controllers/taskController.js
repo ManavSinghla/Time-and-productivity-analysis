@@ -8,6 +8,7 @@ export const createTask = async (req, res) => {
         return res.status(400).json({ message: "Title and timeSpent are required" });
     }
     const task = await Task.create({
+        user: req.user,
         title,
         description,
         timeSpent,
@@ -20,7 +21,7 @@ export const createTask = async (req, res) => {
 // @desc   Get all tasks
 // @route  GET /api/tasks
 export const getTasks = async (req, res) => {
-    const tasks = await Task.find().sort({ createdAt: -1 });
+    const tasks = await Task.find({ user: req.user }).sort({ createdAt: -1 });
     res.json(tasks);
 };
 
