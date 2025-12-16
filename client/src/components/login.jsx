@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { loginUser } from "../services/authService";
 
-function Login() {
+function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -11,9 +11,9 @@ function Login() {
     const res = await loginUser({ email, password });
 
     if (res.token) {
-      localStorage.setItem("token", res.token);
-      alert("Login successful");
-    } else {
+        localStorage.setItem("token", res.token);
+        onLogin();
+    }else {
       alert(res.message || "Login failed");
     }
 
