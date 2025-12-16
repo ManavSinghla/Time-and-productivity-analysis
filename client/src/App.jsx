@@ -1,41 +1,53 @@
 import './App.css';
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
 import Login from "./components/login";
-import Register from "./components/register";
+import Register from "./components/Register";
 import TaskList from "./components/TaskList";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
-import Navbar from "./components/navbar";
+import Navbar from "./components/Navbar";
+import ProtectedRoute from "./components/ProtectedRoute";
+
+function Dashboard() {
+  return (
+    <>
+      <AnalyticsDashboard />
+      <TaskList />
+    </>
+  );
+}
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  // Check token on app load
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-  };
-
   return (
-    <div style={{ padding: "20px" }}>
-      <Navbar isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+    <Router>
+      <Navbar />
 
-      {!isLoggedIn ? (
-        <>
-          <Register />
-          <Login onLogin={() => setIsLoggedIn(true)} />
-        </>
-      ) : (
-        <>
-          <AnalyticsDashboard />
-          <TaskList />
-        </>
-      )}
-    </div>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Route */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default Redirect */}
+        <Route
+          path="/"
+          element={
+            <Navigate
+              to={localStorage.getItem("token") ? "/dashboard" : "/login"}
+            />
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 

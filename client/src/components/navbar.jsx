@@ -1,22 +1,48 @@
-function Navbar({ isLoggedIn, onLogout }) {
+import { useNavigate } from "react-router-dom";
+
+function Navbar() {
+  const navigate = useNavigate();
+
+  const isLoggedIn = !!localStorage.getItem("token");
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+
+    navigate("/login");
+  };
+
   return (
-    <div
+    <nav
       style={{
         display: "flex",
         justifyContent: "space-between",
+        alignItems: "center",
+        padding: "10px 20px",
         marginBottom: "20px",
-        padding: "10px",
         borderBottom: "1px solid #ccc",
       }}
     >
-      <h2>Time & Productivity</h2>
+      <h2 style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+        Time & Productivity
+      </h2>
+      
+      <div>
+        {!isLoggedIn ? (
+          <>
+            <button
+              onClick={() => navigate("/login")}
+              style={{ marginRight: "10px" }}
+            >
+              Login
+            </button>
 
-      {isLoggedIn && (
-        <button onClick={onLogout}>
-          Logout
-        </button>
-      )}
-    </div>
+            <button onClick={() => navigate("/register")}>Register</button>
+          </>
+        ) : (
+          <button onClick={handleLogout}>Logout</button>
+        )}
+      </div>
+    </nav>
   );
 }
 

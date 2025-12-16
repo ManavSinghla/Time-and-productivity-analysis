@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { loginUser } from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -11,9 +13,9 @@ function Login({ onLogin }) {
     const res = await loginUser({ email, password });
 
     if (res.token) {
-        localStorage.setItem("token", res.token);
-        onLogin();
-    }else {
+      localStorage.setItem("token", res.token);
+      navigate("/dashboard");
+    } else {
       alert(res.message || "Login failed");
     }
 
