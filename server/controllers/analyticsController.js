@@ -82,3 +82,23 @@ export const getWeeklySummary = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// @desc   Productivity score (percentage)
+// @route  GET /api/analytics/productivity
+export const getProductivityScore = async (req, res) => {
+    const tasks = await Task.find();
+    let totalTime = 0;
+    let productiveTime = 0;
+    tasks.forEach(task => {
+        totalTime += task.timeSpent;
+        if (task.category === "Study" || task.category === "Work") {
+            productiveTime += task.timeSpent;
+        }
+    });
+    const productivityScore = totalTime === 0 ? 0 : Math.round((productiveTime / totalTime) * 100);
+    res.json({
+        totalTime,
+        productiveTime,
+        productivityScore
+    });
+};
