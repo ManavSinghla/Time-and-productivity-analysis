@@ -20,3 +20,11 @@ export const fetchProductivityScore = async () => {
   const res = await fetch("http://localhost:5000/api/analytics/productivity");
   return res.json();
 };
+export const fetchTodayProductivity = async () => {
+  const res = await fetch("http://localhost:5000/api/analytics/productivity/today");
+  return res.json();
+};
+export const fetchWeeklyProductivity = async () => {
+  const res = await fetch("http://localhost:5000/api/analytics/productivity/week");
+  return res.json();
+};
