@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics, fetchProductivityScore } from "../services/analyticsService";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import ProductivityMeter from "./ProductivityMeter";
+import {
+  fetchTodayProductivity,
+  fetchWeeklyProductivity
+} from "../services/analyticsService";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
@@ -23,19 +27,38 @@ function AnalyticsDashboard() {
 
   const [productivity, setProductivity] = useState(null);
   fetchProductivityScore().then((data) => setProductivity(data));
+
+  const [timeframe, setTimeframe] = useState("today");
+  useEffect(() => {
+  if (timeframe === "today") {
+    fetchTodayProductivity().then(setProductivity);
+  } else {
+    fetchWeeklyProductivity().then(setProductivity);
+  }
+}, [timeframe]);
+
+
   return (
     <div>
       
-      {productivity && (
+      <div style={{ marginBottom: "10px" }}>
+  <button onClick={() => setTimeframe("today")}>
+    Today
+  </button>
+  <button onClick={() => setTimeframe("week")} style={{ marginLeft: "10px" }}>
+    This Week
+  </button>
+</div>
+
+{productivity && (
   <>
     <ProductivityMeter score={productivity.productivityScore} />
-
     <p>
-      Productive Time: {productivity.productiveTime} /{" "}
-      {productivity.totalTime} minutes
+      Productive Time: {productivity.productiveTime} / {productivity.totalTime} minutes
     </p>
   </>
 )}
+
 
 
       {/* CATEGORY PIE CHART */}
