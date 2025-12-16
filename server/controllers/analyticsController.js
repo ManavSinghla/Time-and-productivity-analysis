@@ -102,3 +102,66 @@ export const getProductivityScore = async (req, res) => {
         productivityScore
     });
 };
+
+// @desc   Productivity score for today
+// @route  GET /api/analytics/productivity/today
+export const getTodayProductivity = async (req, res) => {
+    try {
+        const start = new Date();
+        start.setHours(0, 0, 0, 0);
+
+        const end = new Date();
+        end.setHours(23, 59, 59, 999);
+
+        const tasks = await Task.find({
+            date: { $gte: start, $lte: end }
+        });
+
+        let totalTime = 0;
+        let productiveTime = 0;
+
+        tasks.forEach(task => {
+            totalTime += task.timeSpent;
+            if (task.category === "Study" || task.category === "Work") {
+                productiveTime += task.timeSpent;
+            }
+        });
+
+        const score = totalTime === 0 ? 0 : Math.round((productiveTime / totalTime) * 100);
+
+        res.json({ totalTime, productiveTime, productivityScore: score });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc   Productivity score for this week
+// @route  GET /api/analytics/productivity/week
+export const getWeeklyProductivity = async (req, res) => {
+    try {
+        const today = new Date();
+        const start = new Date();
+        start.setDate(today.getDate() - 6);
+        start.setHours(0, 0, 0, 0);
+
+        const tasks = await Task.find({
+            date: { $gte: start, $lte: today }
+        });
+
+        let totalTime = 0;
+        let productiveTime = 0;
+
+        tasks.forEach(task => {
+            totalTime += task.timeSpent;
+            if (task.category === "Study" || task.category === "Work") {
+                productiveTime += task.timeSpent;
+            }
+        });
+
+        const score = totalTime === 0 ? 0 : Math.round((productiveTime / totalTime) * 100);
+
+        res.json({ totalTime, productiveTime, productivityScore: score });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
