@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics } from "../services/analyticsService";
+import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics, fetchProductivityScore } from "../services/analyticsService";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
@@ -20,8 +20,15 @@ function AnalyticsDashboard() {
     fetchWeeklyAnalytics().then((data) => setWeeklyData(data));
   }, []);
 
+  const [productivity, setProductivity] = useState(null);
+  fetchProductivityScore().then((data) => setProductivity(data));
   return (
     <div>
+      <div style={{ marginBottom: "20px" }}>
+        <h3>Productivity Score</h3>
+        <p>{productivity.productivityScore}% productive ({productivity.productiveTime} / {productivity.totalTime} minutes) </p>
+      </div>
+    
       <h2>Productivity Analytics</h2>
 
       <h3>Total Time Today: {todayTotal} minutes</h3>
