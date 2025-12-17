@@ -1,4 +1,5 @@
 import './App.css';
+import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./components/login";
@@ -9,10 +10,16 @@ import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function Dashboard() {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleTaskChange = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <>
-      <AnalyticsDashboard />
-      <TaskList />
+      <AnalyticsDashboard refreshTrigger={refreshTrigger} />
+      <TaskList onTaskChange={handleTaskChange} />
     </>
   );
 }

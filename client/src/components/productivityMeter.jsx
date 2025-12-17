@@ -1,8 +1,13 @@
 function ProductivityMeter({ score }) {
+  // Handle edge cases: undefined, null, or NaN
+  const safeScore = score !== null && score !== undefined && !isNaN(score) 
+    ? Math.max(0, Math.min(100, Number(score))) 
+    : 0;
+
   // Decide color based on score
   const getColor = () => {
-    if (score < 40) return "#e74c3c"; // red
-    if (score < 70) return "#f1c40f"; // yellow
+    if (safeScore < 40) return "#e74c3c"; // red
+    if (safeScore < 70) return "#f1c40f"; // yellow
     return "#2ecc71"; // green
   };
 
@@ -23,7 +28,7 @@ function ProductivityMeter({ score }) {
         {/* Inner filled bar */}
         <div
           style={{
-            width: `${score}%`,
+            width: `${safeScore}%`,
             height: "100%",
             backgroundColor: getColor(),
             transition: "width 0.5s ease",
@@ -32,7 +37,7 @@ function ProductivityMeter({ score }) {
       </div>
 
       <p style={{ marginTop: "8px" }}>
-        {score}% productive
+        {safeScore}% productive
       </p>
     </div>
   );

@@ -5,31 +5,60 @@ import ProductivityMeter from "./ProductivityMeter";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-function AnalyticsDashboard() {
+function AnalyticsDashboard({ refreshTrigger }) {
     const [todayTotal, setTodayTotal] = useState(0);
     const [categoryData, setCategoryData] = useState([]);
     const [dailyData, setDailyData] = useState([]);
 
+    const loadAnalytics = async () => {
+        try {
+            const todayData = await fetchTodayTotal();
+            setTodayTotal(todayData.totalTime || 0);
+            
+            const categoryData = await fetchCategoryAnalytics();
+            setCategoryData(categoryData || []);
+            
+            const dailyData = await fetchDailyAnalytics();
+            setDailyData(dailyData || []);
+        } catch (error) {
+            console.error("Error loading analytics:", error);
+        }
+    };
+
     useEffect(() => {
-        fetchTodayTotal().then((data) => setTodayTotal(data.totalTime));
-        fetchCategoryAnalytics().then((data) => setCategoryData(data));
-        fetchDailyAnalytics().then((data) => setDailyData(data));
-    }, []);
+        loadAnalytics();
+    }, [refreshTrigger]);
 
     const [weeklyData, setWeeklyData] = useState([]);
     useEffect(() => {
-        fetchWeeklyAnalytics().then((data) => setWeeklyData(data));
-    }, []);
+        const loadWeekly = async () => {
+            try {
+                const data = await fetchWeeklyAnalytics();
+                setWeeklyData(data || []);
+            } catch (error) {
+                console.error("Error loading weekly analytics:", error);
+                setWeeklyData([]);
+            }
+        };
+        loadWeekly();
+    }, [refreshTrigger]);
 
     const [timeframe, setTimeframe] = useState("today");
     const [productivity, setProductivity] = useState(null);
     useEffect(() => {
-        if (timeframe === "today") {
-            fetchTodayProductivity().then(setProductivity);
-        } else {
-            fetchWeeklyProductivity().then(setProductivity);
-        }
-    }, [timeframe]);
+        const loadProductivity = async () => {
+            try {
+                const data = timeframe === "today" 
+                    ? await fetchTodayProductivity() 
+                    : await fetchWeeklyProductivity();
+                setProductivity(data);
+            } catch (error) {
+                console.error("Error fetching productivity:", error);
+                setProductivity({ productivityScore: 0, productiveTime: 0, totalTime: 0 });
+            }
+        };
+        loadProductivity();
+    }, [timeframe, refreshTrigger]);
 
 
 

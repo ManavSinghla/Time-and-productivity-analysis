@@ -1,30 +1,64 @@
+const getToken = () => localStorage.getItem("token");
+
 export const fetchTodayTotal = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/today");
+  const res = await fetch("http://localhost:5000/api/analytics/today", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };
 
 export const fetchCategoryAnalytics = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/category");
+  const res = await fetch("http://localhost:5000/api/analytics/category", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };
 
 export const fetchDailyAnalytics = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/daily");
+  const res = await fetch("http://localhost:5000/api/analytics/daily", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };
+
 export const fetchWeeklyAnalytics = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/weekly");
+  const res = await fetch("http://localhost:5000/api/analytics/weekly", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };
+
 export const fetchProductivityScore = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/productivity");
+  const res = await fetch("http://localhost:5000/api/analytics/productivity", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };
+
 export const fetchTodayProductivity = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/productivity/today");
+  const res = await fetch("http://localhost:5000/api/analytics/productivity/today", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };
+
 export const fetchWeeklyProductivity = async () => {
-  const res = await fetch("http://localhost:5000/api/analytics/productivity/week");
+  const res = await fetch("http://localhost:5000/api/analytics/productivity/week", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
   return res.json();
 };

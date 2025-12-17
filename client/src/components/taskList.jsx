@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchTasks, deleteTask, updateTask } from "../services/taskService";
 import AddTask from "./addTask";
 
-function TaskList() {
+function TaskList({ onTaskChange }) {
   const [tasks, setTasks] = useState([]);
 
   // 🔹 Edit state
@@ -25,6 +25,7 @@ function TaskList() {
   const handleDelete = async (id) => {
     await deleteTask(id);
     loadTasks();
+    if (onTaskChange) onTaskChange();
   };
 
   // 🔹 Start editing
@@ -47,11 +48,17 @@ function TaskList() {
 
     setEditingId(null);
     loadTasks();
+    if (onTaskChange) onTaskChange();
+  };
+
+  const handleTaskAdded = () => {
+    loadTasks();
+    if (onTaskChange) onTaskChange();
   };
 
   return (
     <div>
-      <AddTask onTaskAdded={loadTasks} />
+      <AddTask onTaskAdded={handleTaskAdded} />
 
       <h2>Tasks</h2>
 

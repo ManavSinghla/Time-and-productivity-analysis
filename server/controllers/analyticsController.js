@@ -6,6 +6,10 @@ import Task from "../models/task.js";
 // @route  GET /api/analytics/today
 export const getTodayTotalTime = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -24,6 +28,7 @@ export const getTodayTotalTime = async (req, res) => {
 
     res.json({ totalTime });
   } catch (error) {
+    console.error("Error in getTodayTotalTime:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -153,6 +158,10 @@ export const getProductivityScore = async (req, res) => {
 // @route  GET /api/analytics/productivity/today
 export const getTodayProductivity = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const start = new Date();
     start.setHours(0, 0, 0, 0);
 
@@ -181,6 +190,7 @@ export const getTodayProductivity = async (req, res) => {
 
     res.json({ totalTime, productiveTime, productivityScore });
   } catch (error) {
+    console.error("Error in getTodayProductivity:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -190,6 +200,10 @@ export const getTodayProductivity = async (req, res) => {
 // @route  GET /api/analytics/productivity/week
 export const getWeeklyProductivity = async (req, res) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
     const today = new Date();
     const start = new Date();
     start.setDate(today.getDate() - 6);
@@ -217,6 +231,7 @@ export const getWeeklyProductivity = async (req, res) => {
 
     res.json({ totalTime, productiveTime, productivityScore });
   } catch (error) {
+    console.error("Error in getWeeklyProductivity:", error);
     res.status(500).json({ message: error.message });
   }
 };
