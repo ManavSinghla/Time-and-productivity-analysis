@@ -32,6 +32,40 @@ export const deleteTask = async (req, res) => {
     if (!task) {
         return res.json({ message: "Task not found" });
     }
+    if (task.user.toString() !== req.user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
     await task.deleteOne();
     res.json({ message: "Task deleted successfully" });
+};
+
+// @desc   Update a task
+// @route  PUT /api/tasks/:id
+// @access Private
+export const updateTask = async (req, res) => {
+  try {
+    const { title, description, timeSpent, category, date } = req.body;
+
+    const task = await Task.findById(req.params.id);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    // 🔐 Ownership check
+    if (task.user.toString() !== req.user) {
+      return res.status(401).json({ message: "Not authorized" });
+    }
+
+    task.title = title || task.title;
+    task.description = description || task.description;
+    task.timeSpent = timeSpent ?? task.timeSpent;
+    task.category = category || task.category;
+    task.date = date || task.date;
+
+    const updatedTask = await task.save();
+    res.json(updatedTask);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
