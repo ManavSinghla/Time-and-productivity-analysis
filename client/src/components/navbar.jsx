@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import "../App.css";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -7,40 +8,41 @@ function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-
     navigate("/login");
   };
 
   return (
-    <nav
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "10px 20px",
-        marginBottom: "20px",
-        borderBottom: "1px solid #ccc",
-      }}
-    >
-      <h2 style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
-        Time & Productivity
-      </h2>
-      
-      <div>
-        {!isLoggedIn ? (
-          <>
-            <button
-              onClick={() => navigate("/login")}
-              style={{ marginRight: "10px" }}
+    <nav className="navbar">
+      <div className="navbar-content">
+        <h2 onClick={() => navigate("/")}>
+          ⏱️ Time & Productivity Tracker
+        </h2>
+        
+        <div className="navbar-buttons">
+          {!isLoggedIn ? (
+            <>
+              <button
+                className="btn btn-secondary"
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </button>
+              <button 
+                className="btn btn-primary"
+                onClick={() => navigate("/register")}
+              >
+                Register
+              </button>
+            </>
+          ) : (
+            <button 
+              className="btn btn-danger"
+              onClick={handleLogout}
             >
-              Login
+              Logout
             </button>
-
-            <button onClick={() => navigate("/register")}>Register</button>
-          </>
-        ) : (
-          <button onClick={handleLogout}>Logout</button>
-        )}
+          )}
+        </div>
       </div>
     </nav>
   );

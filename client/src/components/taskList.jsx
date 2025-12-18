@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { fetchTasks, deleteTask, updateTask } from "../services/taskService";
 import AddTask from "./addTask";
+import "../App.css";
 
 function TaskList({ onTaskChange }) {
   const [tasks, setTasks] = useState([]);
 
-  // 🔹 Edit state
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({
     title: "",
@@ -21,14 +21,14 @@ function TaskList({ onTaskChange }) {
     loadTasks();
   }, []);
 
-  // 🔹 Delete task
   const handleDelete = async (id) => {
-    await deleteTask(id);
-    loadTasks();
-    if (onTaskChange) onTaskChange();
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      await deleteTask(id);
+      loadTasks();
+      if (onTaskChange) onTaskChange();
+    }
   };
 
-  // 🔹 Start editing
   const startEdit = (task) => {
     setEditingId(task._id);
     setEditData({
@@ -38,7 +38,6 @@ function TaskList({ onTaskChange }) {
     });
   };
 
-  // 🔹 Save updated task
   const handleUpdate = async (id) => {
     await updateTask(id, {
       title: editData.title,
@@ -56,86 +55,113 @@ function TaskList({ onTaskChange }) {
     if (onTaskChange) onTaskChange();
   };
 
+  const getCategoryClass = (category) => {
+    const classes = {
+      Study: "category-study",
+      Work: "category-work",
+      Personal: "category-personal",
+      Other: "category-other",
+    };
+    return classes[category] || classes.Other;
+  };
+
   return (
-    <div>
+    <div className="container">
       <AddTask onTaskAdded={handleTaskAdded} />
 
-      <h2>Tasks</h2>
+      <div className="task-list-container">
+        <h2 className="section-title">📋 Your Tasks</h2>
 
-      {tasks.length === 0 && <p>No tasks found</p>}
+        {tasks.length === 0 ? (
+          <div className="empty-state">
+            <p>No tasks found. Add your first task above!</p>
+          </div>
+        ) : (
+          <div>
+            {tasks.map((task) => (
+              <div key={task._id} className="task-item">
+                {editingId === task._id ? (
+                  <div className="task-edit-form">
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={editData.title}
+                      onChange={(e) =>
+                        setEditData({ ...editData, title: e.target.value })
+                      }
+                      placeholder="Task title"
+                    />
 
-      <ul>
-        {tasks.map((task) => (
-          <li key={task._id} style={{ marginBottom: "10px" }}>
-            {editingId === task._id ? (
-              <>
-                {/* Edit mode */}
-                <input
-                  type="text"
-                  value={editData.title}
-                  onChange={(e) =>
-                    setEditData({ ...editData, title: e.target.value })
-                  }
-                />
+                    <input
+                      type="number"
+                      className="form-input"
+                      value={editData.timeSpent}
+                      onChange={(e) =>
+                        setEditData({ ...editData, timeSpent: e.target.value })
+                      }
+                      placeholder="Minutes"
+                    />
 
-                <input
-                  type="number"
-                  value={editData.timeSpent}
-                  onChange={(e) =>
-                    setEditData({ ...editData, timeSpent: e.target.value })
-                  }
-                  style={{ marginLeft: "5px" }}
-                />
+                    <select
+                      className="form-select"
+                      value={editData.category}
+                      onChange={(e) =>
+                        setEditData({ ...editData, category: e.target.value })
+                      }
+                    >
+                      <option>Study</option>
+                      <option>Work</option>
+                      <option>Personal</option>
+                      <option>Other</option>
+                    </select>
 
-                <select
-                  value={editData.category}
-                  onChange={(e) =>
-                    setEditData({ ...editData, category: e.target.value })
-                  }
-                  style={{ marginLeft: "5px" }}
-                >
-                  <option>Study</option>
-                  <option>Work</option>
-                  <option>Personal</option>
-                  <option>Other</option>
-                </select>
+                    <button
+                      className="btn btn-success"
+                      onClick={() => handleUpdate(task._id)}
+                    >
+                      Save
+                    </button>
 
-                <button
-                  onClick={() => handleUpdate(task._id)}
-                  style={{ marginLeft: "5px" }}
-                >
-                  Save
-                </button>
+                    <button
+                      className="btn btn-cancel"
+                      onClick={() => setEditingId(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <div className="task-content">
+                    <div className="task-info">
+                      <div className="task-title">{task.title}</div>
+                      <div className="task-meta">
+                        <span className={`task-category ${getCategoryClass(task.category)}`}>
+                          {task.category}
+                        </span>
+                        <span className="task-time">⏱️ {task.timeSpent} min</span>
+                      </div>
+                    </div>
 
-                <button
-                  onClick={() => setEditingId(null)}
-                  style={{ marginLeft: "5px" }}
-                >
-                  Cancel
-                </button>
-              </>
-            ) : (
-              <>
-                {/* View mode */}
-                <strong>{task.title}</strong> – {task.timeSpent} min (
-                {task.category})
-                <button
-                  style={{ marginLeft: "10px" }}
-                  onClick={() => startEdit(task)}
-                >
-                  Edit
-                </button>
-                <button
-                  style={{ marginLeft: "5px" }}
-                  onClick={() => handleDelete(task._id)}
-                >
-                  Delete
-                </button>
-              </>
-            )}
-          </li>
-        ))}
-      </ul>
+                    <div className="task-actions">
+                      <button
+                        className="btn btn-edit"
+                        onClick={() => startEdit(task)}
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        className="btn btn-delete"
+                        onClick={() => handleDelete(task._id)}
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

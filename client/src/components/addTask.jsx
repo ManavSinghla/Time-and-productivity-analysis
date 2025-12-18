@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { addTask } from "../services/taskService";
+import "../App.css";
 
 function AddTask({ onTaskAdded }) {
   const [title, setTitle] = useState("");
@@ -14,51 +15,72 @@ function AddTask({ onTaskAdded }) {
       return;
     }
 
-    const newTask = {
+    await addTask({
       title,
       timeSpent: Number(timeSpent),
       category,
-    };
-
-    await addTask(newTask);
+    });
 
     setTitle("");
     setTimeSpent("");
     setCategory("Study");
-
-    onTaskAdded(); // refresh list
+    onTaskAdded();
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Add Task</h2>
+    <div className="task-form">
+      <h2 className="task-form-title">➕ Add New Task</h2>
+      
+      <form onSubmit={handleSubmit} className="task-form-grid">
+        <div>
+          <label className="form-label" htmlFor="task-title">Task Title</label>
+          <input
+            id="task-title"
+            type="text"
+            className="form-input"
+            placeholder="Enter task title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+          />
+        </div>
 
-      <input
-        type="text"
-        placeholder="Task title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+        <div>
+          <label className="form-label" htmlFor="time-spent">Time (minutes)</label>
+          <input
+            id="time-spent"
+            type="number"
+            className="form-input"
+            placeholder="Minutes"
+            value={timeSpent}
+            onChange={(e) => setTimeSpent(e.target.value)}
+            min="1"
+            required
+          />
+        </div>
 
-      <input
-        type="number"
-        placeholder="Time spent (minutes)"
-        value={timeSpent}
-        onChange={(e) => setTimeSpent(e.target.value)}
-      />
+        <div>
+          <label className="form-label" htmlFor="category">Category</label>
+          <select
+            id="category"
+            className="form-select"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option>Study</option>
+            <option>Work</option>
+            <option>Personal</option>
+            <option>Other</option>
+          </select>
+        </div>
 
-      <select
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-      >
-        <option>Study</option>
-        <option>Work</option>
-        <option>Personal</option>
-        <option>Other</option>
-      </select>
-
-      <button type="submit">Add Task</button>
-    </form>
+        <div>
+          <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
+            Add Task
+          </button>
+        </div>
+      </form>
+    </div>
   );
 }
 

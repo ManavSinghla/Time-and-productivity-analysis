@@ -24,7 +24,21 @@ export const registerUser = async (req, res) => {
       password: hashedPassword
     });
 
-    res.status(201).json({ message: "User registered successfully" });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({ 
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
 };
 
 // LOGIN
@@ -55,4 +69,21 @@ export const loginUser = async (req, res) => {
         email: user.email
       }
     });
+};
+
+// GET CURRENT USER
+export const getCurrentUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.user).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({
+      id: user._id,
+      name: user.name,
+      email: user.email
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

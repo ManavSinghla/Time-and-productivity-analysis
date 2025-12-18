@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./components/login";
 import Register from "./components/Register";
 import TaskList from "./components/TaskList";
-import AnalyticsDashboard from "./components/AnalyticsDashboard";
+import AnalyticsDashboard from "./components/analyticsDashboard";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -17,10 +17,10 @@ function Dashboard() {
   };
 
   return (
-    <>
+    <div className="dashboard-container">
       <AnalyticsDashboard refreshTrigger={refreshTrigger} />
       <TaskList onTaskChange={handleTaskChange} />
-    </>
+    </div>
   );
 }
 
