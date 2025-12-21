@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics, fetchProductivityScore, fetchTodayProductivity, fetchWeeklyProductivity } from "../services/analyticsService";
 import { getCurrentUser } from "../services/authService";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import ProductivityMeter from "./ProductivityMeter";
+import ProductivityMeter from "./productivityMeter";
 import "../App.css";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
