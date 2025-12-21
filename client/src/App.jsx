@@ -3,11 +3,11 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "./components/login";
-import Register from "./components/Register";
-import TaskList from "./components/TaskList";
+import Register from "./components/register";
+import TaskList from "./components/taskList";
 import AnalyticsDashboard from "./components/analyticsDashboard";
-import Navbar from "./components/Navbar";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/navbar";
+import ProtectedRoute from "./components/protectedRoute";
 
 function Dashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
