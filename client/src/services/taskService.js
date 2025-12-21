@@ -24,9 +24,13 @@ export const addTask = async (taskData) => {
 };
 
 export const deleteTask = async (id) => {
-  await fetch(`http://localhost:5000/api/tasks/${id}`, {
+  const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
     method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
   });
+  return res.json();
 };
 
 export const updateTask = async (id, updatedData) => {
