@@ -11,15 +11,20 @@ app.use(cors());
 app.use(express.json());
 
 app.get("/", (req, res) => {
-    res.send("Server is running fine");
+    res.json("Server is running fine");
 });
 
 connectDB();
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+// Export the app for Vercel
+export default app;
+
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
 
 import taskRoutes from "./routes/taskRoutes.js";
 app.use("/api/tasks", taskRoutes);
