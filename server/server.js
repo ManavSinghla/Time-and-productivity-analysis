@@ -7,18 +7,33 @@ import cors from "cors";
 dotenv.config();
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: "*",
+    credentials: true
+}));
 app.use(express.json());
 
 app.get("/", (req, res) => {
     res.json("Server is running fine");
 });
 
-connectDB();
-const PORT = process.env.PORT || 5000;
 
-// Export the app for Vercel
-export default app;
+// Routes
+import taskRoutes from "./routes/taskRoutes.js";
+import analyticsRoutes from "./routes/analyticsRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+
+app.use("/api/tasks", taskRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/auth", authRoutes);
+
+// Connect to DB (serverless compatible)
+if (!process.env.MONGO_URI) {
+    console.error("CRITICAL ERROR: MONGO_URI is undefined in environment variables.");
+}
+connectDB();
+
+const PORT = process.env.PORT || 5000;
 
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => {
@@ -26,11 +41,4 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
-import taskRoutes from "./routes/taskRoutes.js";
-app.use("/api/tasks", taskRoutes);
-
-import analyticsRoutes from "./routes/analyticsRoutes.js";
-app.use("/api/analytics", analyticsRoutes);
-
-import authRoutes from "./routes/authRoutes.js";
-app.use("/api/auth", authRoutes);
+export default app;

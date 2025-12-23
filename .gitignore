@@ -1,6 +1,6 @@
 # Ignore Node.js dependencies
 node_modules/
-**/.env
+
 # Also ignore nested node_modules in subprojects
 **/node_modules/
 
