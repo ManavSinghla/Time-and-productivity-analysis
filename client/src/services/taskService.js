@@ -1,8 +1,9 @@
 // Connects React → Backend
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 const getToken = () => localStorage.getItem("token");
 
 export const fetchTasks = async () => {
-  const res = await fetch("http://localhost:5000/api/tasks", {
+  const res = await fetch(`${API_BASE_URL}/api/tasks`, {
     headers: {
       Authorization: `Bearer ${getToken()}`,
     },
@@ -11,7 +12,7 @@ export const fetchTasks = async () => {
 };
 
 export const addTask = async (taskData) => {
-  const res = await fetch("http://localhost:5000/api/tasks", {
+  const res = await fetch(`${API_BASE_URL}/api/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -24,7 +25,7 @@ export const addTask = async (taskData) => {
 };
 
 export const deleteTask = async (id) => {
-  const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${getToken()}`,
@@ -36,7 +37,7 @@ export const deleteTask = async (id) => {
 export const updateTask = async (id, updatedData) => {
   const token = localStorage.getItem("token");
 
-  const res = await fetch(`http://localhost:5000/api/tasks/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/api/tasks/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
