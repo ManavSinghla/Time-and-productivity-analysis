@@ -1,7 +1,7 @@
 import { getBaseApiUrl } from "../utils";
 
 // Connects React → Backend
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || getBaseApiUrl();
+const API_BASE_URL = getBaseApiUrl();
 const getToken = () => localStorage.getItem("token");
 
 export const fetchTasks = async () => {

@@ -1,8 +1,6 @@
 import { getBaseApiUrl } from "../utils";
 
-const API_URL = import.meta.env.VITE_API_BASE_URL
-  ? `${import.meta.env.VITE_API_BASE_URL}/api/auth`
-  : `${getBaseApiUrl()}api/auth`;
+const API_URL = `${getBaseApiUrl()}/api/auth`;
 
 export const registerUser = async (userData) => {
   const res = await fetch(`${API_URL}/register`, {
