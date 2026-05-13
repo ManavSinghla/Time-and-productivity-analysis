@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics, fetchProductivityScore, fetchTodayProductivity, fetchWeeklyProductivity } from "../services/analyticsService";
+import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeeklyAnalytics, fetchProductivityScore, fetchTodayProductivity, fetchWeeklyProductivity, fetchGamificationStats, fetchGoalsStats } from "../services/analyticsService";
 import { getCurrentUser } from "../services/authService";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import ProductivityMeter from "./productivityMeter";
+import { fetchTasks } from "../services/taskService";
 import "../App.css";
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
@@ -83,6 +84,63 @@ function AnalyticsDashboard({ refreshTrigger }) {
         loadProductivity();
     }, [timeframe, refreshTrigger]);
 
+    const [gamification, setGamification] = useState(null);
+    useEffect(() => {
+        const loadGamification = async () => {
+            try {
+                const data = await fetchGamificationStats();
+                setGamification(data);
+            } catch (error) {
+                console.error("Error fetching gamification:", error);
+            }
+        };
+        loadGamification();
+    }, [refreshTrigger]);
+
+    const [goals, setGoals] = useState(null);
+    useEffect(() => {
+        const loadGoals = async () => {
+            try {
+                const data = await fetchGoalsStats();
+                setGoals(data);
+            } catch (error) {
+                console.error("Error fetching goals:", error);
+            }
+        };
+        loadGoals();
+    }, [refreshTrigger]);
+
+    const handleExportCSV = async () => {
+        try {
+            const tasks = await fetchTasks();
+            if (!tasks || tasks.length === 0) {
+                alert("No tasks available to export.");
+                return;
+            }
+
+            const headers = ["Title,Time Spent (minutes),Category,Date"];
+            
+            const rows = tasks.map(task => {
+                const date = task.createdAt ? new Date(task.createdAt).toLocaleDateString() : new Date().toLocaleDateString();
+                const title = `"${task.title.replace(/"/g, '""')}"`;
+                return `${title},${task.timeSpent},${task.category},${date}`;
+            });
+
+            const csvContent = headers.concat(rows).join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `productivity_report_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch (error) {
+            console.error("Error exporting CSV:", error);
+            alert("Failed to export tasks. Please try again.");
+        }
+    };
+
     return (
         <div className="container">
             <div className="analytics-container">
@@ -95,6 +153,13 @@ function AnalyticsDashboard({ refreshTrigger }) {
                             </p>
                         )}
                     </div>
+                    <button 
+                        onClick={handleExportCSV}
+                        className="btn btn-secondary"
+                        style={{ display: "flex", alignItems: "center", gap: "0.5rem", border: "2px solid #667eea" }}
+                    >
+                        📥 Export to CSV
+                    </button>
                 </div>
                 <p className="analytics-subtitle">Track your productivity and time management</p>
 
@@ -130,6 +195,97 @@ function AnalyticsDashboard({ refreshTrigger }) {
                     <p className="stats-value">{todayTotal} minutes</p>
                 </div>
             </div>
+
+            {goals && (
+                <div className="analytics-container">
+                    <h3 className="chart-title">🎯 Daily & Weekly Targets</h3>
+                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                        
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                                <span style={{ fontWeight: "600", color: "#1f2937" }}>📚 Study 120 minutes today</span>
+                                <span style={{ color: "#6b7280" }}>{goals.studyToday} / 120 min</span>
+                            </div>
+                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+                                <div style={{ width: `${Math.min((goals.studyToday / 120) * 100, 100)}%`, height: "100%", background: "#3b82f6", transition: "width 0.5s ease-out" }}></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                                <span style={{ fontWeight: "600", color: "#1f2937" }}>💼 Work 6 hours this week</span>
+                                <span style={{ color: "#6b7280" }}>{Math.floor(goals.workThisWeek / 60)}h {goals.workThisWeek % 60}m / 6h</span>
+                            </div>
+                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+                                <div style={{ width: `${Math.min((goals.workThisWeek / 360) * 100, 100)}%`, height: "100%", background: "#8b5cf6", transition: "width 0.5s ease-out" }}></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                                <span style={{ fontWeight: "600", color: "#1f2937" }}>🎮 Max 60 mins on "Other" today</span>
+                                <span style={{ color: "#6b7280" }}>{goals.otherToday} / 60 min</span>
+                            </div>
+                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+                                <div style={{ width: `${Math.min((goals.otherToday / 60) * 100, 100)}%`, height: "100%", background: goals.otherToday > 60 ? "#ef4444" : "#10b981", transition: "width 0.5s ease-out" }}></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                                <span style={{ fontWeight: "600", color: "#1f2937" }}>🔥 Maintain a 7-day streak</span>
+                                <span style={{ color: "#6b7280" }}>{goals.currentStreak} / 7 days</span>
+                            </div>
+                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+                                <div style={{ width: `${Math.min((goals.currentStreak / 7) * 100, 100)}%`, height: "100%", background: "#f59e0b", transition: "width 0.5s ease-out" }}></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            )}
+
+            {gamification && (
+                <div className="analytics-container">
+                    <h3 className="chart-title">🎮 Your Achievements</h3>
+                    
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginBottom: '2rem' }}>
+                        <div className="stats-card" style={{ flex: '1', minWidth: '200px', margin: 0, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
+                            <h3 className="stats-title">🔥 Current Streak</h3>
+                            <p className="stats-value">{gamification.currentStreak} Days</p>
+                        </div>
+                        <div className="stats-card" style={{ flex: '1', minWidth: '200px', margin: 0, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+                            <h3 className="stats-title">⏱️ Total Logged</h3>
+                            <p className="stats-value" style={{ fontSize: '2.5rem' }}>{Math.floor(gamification.totalTimeLogged / 60)}h {gamification.totalTimeLogged % 60}m</p>
+                        </div>
+                    </div>
+
+                    <h4 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#374151' }}>Badges Earned ({gamification.badges.length})</h4>
+                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+                        {gamification.badges.map((badge, idx) => (
+                            <div key={idx} style={{ 
+                                background: '#f3f4f6', 
+                                padding: '1rem', 
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '1rem',
+                                border: '2px solid #e5e7eb',
+                                minWidth: '250px'
+                            }}>
+                                <span style={{ fontSize: '2.5rem' }}>{badge.icon}</span>
+                                <div>
+                                    <p style={{ fontWeight: 'bold', margin: 0, color: '#1f2937' }}>{badge.name}</p>
+                                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7280' }}>{badge.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                        {gamification.badges.length === 0 && (
+                            <p style={{ color: '#6b7280', fontStyle: 'italic' }}>Complete tasks to earn your first badge!</p>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <div className="analytics-container">
                 <h3 className="chart-title">📊 Time Spent by Category</h3>

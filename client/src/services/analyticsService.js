@@ -65,3 +65,21 @@ export const fetchWeeklyProductivity = async () => {
   });
   return res.json();
 };
+
+export const fetchGamificationStats = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/analytics/gamification`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return res.json();
+};
+
+export const fetchGoalsStats = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/analytics/goals`, {
+    headers: {
+      Authorization: `Bearer ${getToken()}`,
+    },
+  });
+  return res.json();
+};

@@ -235,3 +235,132 @@ export const getWeeklyProductivity = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// GAMIFICATION STATS
+// @desc   Get user streaks and badges
+// @route  GET /api/analytics/gamification
+export const getGamificationStats = async (req, res) => {
+  try {
+    const tasks = await Task.find({ user: req.user }).sort({ date: -1 });
+    
+    // Calculate total time
+    const totalTimeLogged = tasks.reduce((sum, t) => sum + t.timeSpent, 0);
+
+    // Calculate Streak
+    let currentStreak = 0;
+    const uniqueDates = [...new Set(tasks.map(t => new Date(t.date).toISOString().split('T')[0]))].sort().reverse();
+    
+    if (uniqueDates.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = yesterdayDate.toISOString().split('T')[0];
+      
+      if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+        currentStreak = 1;
+        let checkDate = new Date(uniqueDates[0]);
+        for (let i = 1; i < uniqueDates.length; i++) {
+          checkDate.setDate(checkDate.getDate() - 1);
+          const expectedDateStr = checkDate.toISOString().split('T')[0];
+          if (uniqueDates[i] === expectedDateStr) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    // Determine Badges
+    const badges = [];
+    if (tasks.length > 0) badges.push({ id: "first_task", name: "First Step", icon: "🌱", description: "Logged your first task!" });
+    if (currentStreak >= 3) badges.push({ id: "streak_3", name: "On Fire", icon: "🔥", description: "Maintained a 3-day streak!" });
+    if (currentStreak >= 7) badges.push({ id: "streak_7", name: "Consistency Master", icon: "🏆", description: "7-day streak achieved!" });
+    if (totalTimeLogged >= 600) badges.push({ id: "time_10h", name: "Time Wizard", icon: "🧙‍♂️", description: "Logged over 10 hours of productivity." });
+    
+    res.json({
+      currentStreak,
+      totalTimeLogged,
+      badges
+    });
+  } catch (error) {
+    console.error("Error in getGamificationStats:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GOALS STATS
+// @desc   Get specific target goals progress
+// @route  GET /api/analytics/goals
+export const getGoalsStats = async (req, res) => {
+  try {
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() - 6);
+    weekStart.setHours(0, 0, 0, 0);
+
+    // 1. Study time today
+    const studyTodayTasks = await Task.find({
+      user: req.user,
+      category: "Study",
+      date: { $gte: todayStart, $lte: todayEnd }
+    });
+    const studyToday = studyTodayTasks.reduce((sum, t) => sum + t.timeSpent, 0);
+
+    // 2. Work time this week
+    const workWeekTasks = await Task.find({
+      user: req.user,
+      category: "Work",
+      date: { $gte: weekStart, $lte: todayEnd }
+    });
+    const workThisWeek = workWeekTasks.reduce((sum, t) => sum + t.timeSpent, 0);
+
+    // 3. Other time today
+    const otherTodayTasks = await Task.find({
+      user: req.user,
+      category: "Other",
+      date: { $gte: todayStart, $lte: todayEnd }
+    });
+    const otherToday = otherTodayTasks.reduce((sum, t) => sum + t.timeSpent, 0);
+
+    // 4. Current streak (reuse logic from gamification)
+    const allTasks = await Task.find({ user: req.user }).sort({ date: -1 });
+    let currentStreak = 0;
+    const uniqueDates = [...new Set(allTasks.map(t => new Date(t.date).toISOString().split('T')[0]))].sort().reverse();
+    if (uniqueDates.length > 0) {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterdayDate = new Date();
+      yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+      const yesterday = yesterdayDate.toISOString().split('T')[0];
+      
+      if (uniqueDates[0] === today || uniqueDates[0] === yesterday) {
+        currentStreak = 1;
+        let checkDate = new Date(uniqueDates[0]);
+        for (let i = 1; i < uniqueDates.length; i++) {
+          checkDate.setDate(checkDate.getDate() - 1);
+          const expectedDateStr = checkDate.toISOString().split('T')[0];
+          if (uniqueDates[i] === expectedDateStr) {
+            currentStreak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    res.json({
+      studyToday,
+      workThisWeek,
+      otherToday,
+      currentStreak
+    });
+
+  } catch (error) {
+    console.error("Error in getGoalsStats:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
