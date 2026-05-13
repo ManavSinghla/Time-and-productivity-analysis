@@ -21,10 +21,12 @@ app.get("/", (req, res) => {
 import taskRoutes from "./routes/taskRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import goalRoutes from "./routes/goalRoutes.js";
 
 app.use("/api/tasks", taskRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/goals", goalRoutes);
 
 // Connect to DB (serverless compatible)
 if (!process.env.MONGO_URI) {

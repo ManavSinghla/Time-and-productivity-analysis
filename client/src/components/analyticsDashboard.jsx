@@ -3,6 +3,7 @@ import { fetchTodayTotal, fetchCategoryAnalytics, fetchDailyAnalytics, fetchWeek
 import { getCurrentUser } from "../services/authService";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import ProductivityMeter from "./productivityMeter";
+import GoalManager from "./goalManager";
 import { fetchTasks } from "../services/taskService";
 import "../App.css";
 
@@ -97,19 +98,6 @@ function AnalyticsDashboard({ refreshTrigger }) {
         loadGamification();
     }, [refreshTrigger]);
 
-    const [goals, setGoals] = useState(null);
-    useEffect(() => {
-        const loadGoals = async () => {
-            try {
-                const data = await fetchGoalsStats();
-                setGoals(data);
-            } catch (error) {
-                console.error("Error fetching goals:", error);
-            }
-        };
-        loadGoals();
-    }, [refreshTrigger]);
-
     const handleExportCSV = async () => {
         try {
             const tasks = await fetchTasks();
@@ -196,54 +184,7 @@ function AnalyticsDashboard({ refreshTrigger }) {
                 </div>
             </div>
 
-            {goals && (
-                <div className="analytics-container">
-                    <h3 className="chart-title">🎯 Daily & Weekly Targets</h3>
-                    <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                        
-                        <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                <span style={{ fontWeight: "600", color: "#1f2937" }}>📚 Study 120 minutes today</span>
-                                <span style={{ color: "#6b7280" }}>{goals.studyToday} / 120 min</span>
-                            </div>
-                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
-                                <div style={{ width: `${Math.min((goals.studyToday / 120) * 100, 100)}%`, height: "100%", background: "#3b82f6", transition: "width 0.5s ease-out" }}></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                <span style={{ fontWeight: "600", color: "#1f2937" }}>💼 Work 6 hours this week</span>
-                                <span style={{ color: "#6b7280" }}>{Math.floor(goals.workThisWeek / 60)}h {goals.workThisWeek % 60}m / 6h</span>
-                            </div>
-                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
-                                <div style={{ width: `${Math.min((goals.workThisWeek / 360) * 100, 100)}%`, height: "100%", background: "#8b5cf6", transition: "width 0.5s ease-out" }}></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                <span style={{ fontWeight: "600", color: "#1f2937" }}>🎮 Max 60 mins on "Other" today</span>
-                                <span style={{ color: "#6b7280" }}>{goals.otherToday} / 60 min</span>
-                            </div>
-                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
-                                <div style={{ width: `${Math.min((goals.otherToday / 60) * 100, 100)}%`, height: "100%", background: goals.otherToday > 60 ? "#ef4444" : "#10b981", transition: "width 0.5s ease-out" }}></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                <span style={{ fontWeight: "600", color: "#1f2937" }}>🔥 Maintain a 7-day streak</span>
-                                <span style={{ color: "#6b7280" }}>{goals.currentStreak} / 7 days</span>
-                            </div>
-                            <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
-                                <div style={{ width: `${Math.min((goals.currentStreak / 7) * 100, 100)}%`, height: "100%", background: "#f59e0b", transition: "width 0.5s ease-out" }}></div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            )}
+            <GoalManager refreshTrigger={refreshTrigger} />
 
             {gamification && (
                 <div className="analytics-container">
