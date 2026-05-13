@@ -4,8 +4,6 @@ import "../App.css";
 
 function AddTask({ onTaskAdded }) {
   const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [timeSpent, setTimeSpent] = useState("");
   const [category, setCategory] = useState("Study");
 
@@ -69,7 +67,7 @@ function AddTask({ onTaskAdded }) {
       alert("Please enter a task title before saving!");
       return;
     }
-    await addTask({ title, description, timeSpent: minutes, category, date });
+    await addTask({ title, timeSpent: minutes, category });
     resetForm();
   };
 
@@ -85,15 +83,13 @@ function AddTask({ onTaskAdded }) {
       alert("Please enter a task title before saving!");
       return;
     }
-    await addTask({ title, description, timeSpent: minutes, category, date });
+    await addTask({ title, timeSpent: minutes, category });
     resetForm();
     setEntryMode("manual");
   };
 
   const resetForm = () => {
     setTitle("");
-    setDescription("");
-    setDate(new Date().toISOString().split("T")[0]);
     setTimeSpent("");
     setCategory("Study");
     setSecondsElapsed(0);
@@ -112,10 +108,8 @@ function AddTask({ onTaskAdded }) {
     }
     await addTask({
       title,
-      description,
       timeSpent: Number(timeSpent),
       category,
-      date
     });
     resetForm();
   };
@@ -159,31 +153,6 @@ function AddTask({ onTaskAdded }) {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required={entryMode === "manual"}
-          />
-        </div>
-
-        <div>
-          <label className="form-label" htmlFor="task-date">Date</label>
-          <input
-            id="task-date"
-            type="date"
-            className="form-input"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            required
-          />
-        </div>
-
-        <div style={{ gridColumn: "1 / -1" }}>
-          <label className="form-label" htmlFor="task-desc">Description (Optional)</label>
-          <textarea
-            id="task-desc"
-            className="form-input"
-            placeholder="Add some details..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows="2"
-            style={{ resize: "vertical" }}
           />
         </div>
 

@@ -11,6 +11,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 function AnalyticsDashboard({ refreshTrigger }) {
     const [userName, setUserName] = useState("");
+    const [userPrefs, setUserPrefs] = useState({ dailyGoal: 120 });
     const [todayTotal, setTodayTotal] = useState(0);
     const [categoryData, setCategoryData] = useState([]);
     const [dailyData, setDailyData] = useState([]);
@@ -42,9 +43,14 @@ function AnalyticsDashboard({ refreshTrigger }) {
                     setUserName(storedName);
                 } else {
                     const userData = await getCurrentUser();
-                    if (userData.name) {
-                        setUserName(userData.name);
-                        localStorage.setItem("userName", userData.name);
+                    if (userData) {
+                        if (userData.name) {
+                            setUserName(userData.name);
+                            localStorage.setItem("userName", userData.name);
+                        }
+                        if (userData.preferences) {
+                            setUserPrefs(userData.preferences);
+                        }
                     }
                 }
             } catch (error) {
@@ -129,6 +135,30 @@ function AnalyticsDashboard({ refreshTrigger }) {
         }
     };
 
+    const getSmartInsights = () => {
+        const insights = [];
+        
+        if (todayTotal === 0) {
+            insights.push({ type: "warning", icon: "🔔", text: "You have not logged time today." });
+        } else {
+            if (todayTotal >= userPrefs.dailyGoal) {
+                insights.push({ type: "success", icon: "🌟", text: "You reached your daily goal!" });
+            }
+            if (todayTotal >= 50 && todayTotal < 60) {
+                insights.push({ type: "info", icon: "☕", text: "You have been working for 50 minutes. Take a break!" });
+            } else if (todayTotal >= 120 && todayTotal % 120 < 20) {
+                insights.push({ type: "info", icon: "☕", text: "You've logged a lot of time. Remember to take regular breaks!" });
+            }
+        }
+
+        if (productivity && productivity.productivityScore < 40) {
+            insights.push({ type: "warning", icon: "📉", text: "Your productivity is below your weekly average. Try focusing on Work or Study tasks!" });
+        }
+
+        return insights;
+    };
+    const insights = getSmartInsights();
+
     return (
         <div className="container">
             <div className="analytics-container">
@@ -150,6 +180,31 @@ function AnalyticsDashboard({ refreshTrigger }) {
                     </button>
                 </div>
                 <p className="analytics-subtitle">Track your productivity and time management</p>
+
+                {insights.length > 0 && (
+                    <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1rem", marginBottom: "2rem" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", color: "#475569", fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                            💡 Smart Reminders
+                        </h4>
+                        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                            {insights.map((insight, idx) => (
+                                <div key={idx} style={{ 
+                                    display: "flex", 
+                                    alignItems: "center", 
+                                    gap: "0.75rem",
+                                    padding: "0.75rem 1rem",
+                                    background: insight.type === "warning" ? "#fffbeb" : insight.type === "success" ? "#f0fdf4" : "#eff6ff",
+                                    color: insight.type === "warning" ? "#b45309" : insight.type === "success" ? "#166534" : "#1e40af",
+                                    borderRadius: "8px",
+                                    borderLeft: `4px solid ${insight.type === "warning" ? "#f59e0b" : insight.type === "success" ? "#22c55e" : "#3b82f6"}`
+                                }}>
+                                    <span style={{ fontSize: "1.2rem" }}>{insight.icon}</span>
+                                    <span style={{ fontWeight: "500" }}>{insight.text}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="timeframe-toggle">
                     <button

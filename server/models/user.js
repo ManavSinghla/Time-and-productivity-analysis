@@ -14,6 +14,10 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true
+    },
+    preferences: {
+      defaultCategory: { type: String, default: "Study" },
+      dailyGoal: { type: Number, default: 120 }
     }
   },
   { timestamps: true }

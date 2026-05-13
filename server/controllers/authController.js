@@ -81,8 +81,87 @@ export const getCurrentUser = async (req, res) => {
     res.json({
       id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
+      preferences: user.preferences
     });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// UPDATE PROFILE
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = req.body.name || user.name;
+    
+    if (req.body.preferences) {
+      user.preferences.defaultCategory = req.body.preferences.defaultCategory || user.preferences.defaultCategory;
+      user.preferences.dailyGoal = req.body.preferences.dailyGoal || user.preferences.dailyGoal;
+    }
+
+    const updatedUser = await user.save();
+
+    res.json({
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      preferences: updatedUser.preferences
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// CHANGE PASSWORD
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid current password" });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    
+    await user.save();
+    
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// DELETE ACCOUNT
+import Task from "../models/task.js";
+import Goal from "../models/goal.js";
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete associated data
+    await Task.deleteMany({ user: req.user });
+    await Goal.deleteMany({ user: req.user });
+    
+    // Delete user
+    await user.deleteOne();
+    
+    res.json({ message: "Account deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

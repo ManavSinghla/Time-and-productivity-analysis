@@ -36,3 +36,40 @@ export const getCurrentUser = async () => {
 
   return res.json();
 };
+
+export const updateProfile = async (profileData) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(profileData),
+  });
+  return res.json();
+};
+
+export const changePassword = async (passwordData) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/password`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(passwordData),
+  });
+  return res.json();
+};
+
+export const deleteAccount = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/account`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.json();
+};

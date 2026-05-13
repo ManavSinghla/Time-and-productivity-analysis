@@ -35,12 +35,21 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <button 
-              className="btn btn-danger"
-              onClick={handleLogout}
-            >
-              Logout
-            </button>
+            <>
+              <button 
+                className="btn btn-secondary"
+                onClick={() => navigate("/settings")}
+                style={{ marginRight: "0.5rem" }}
+              >
+                ⚙️ Settings
+              </button>
+              <button 
+                className="btn btn-danger"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+            </>
           )}
         </div>
       </div>

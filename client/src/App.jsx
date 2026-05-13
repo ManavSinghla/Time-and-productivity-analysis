@@ -8,6 +8,7 @@ import TaskList from "./components/taskList";
 import AnalyticsDashboard from "./components/analyticsDashboard";
 import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/protectedRoute";
+import Settings from "./components/settings";
 
 function Dashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -40,6 +41,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
