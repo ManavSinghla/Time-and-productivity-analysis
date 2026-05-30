@@ -1,6 +1,6 @@
 import './App.css';
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 
 import Login from "./components/login";
 import Register from "./components/register";
@@ -18,51 +18,73 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" style={{ background: "transparent", padding: 0 }}>
       <AnalyticsDashboard refreshTrigger={refreshTrigger} />
       <TaskList onTaskChange={handleTaskChange} />
     </div>
   );
 }
 
+function AppContent({ theme, toggleTheme }) {
+  const location = useLocation();
+  const isAuthRoute = location.pathname === "/login" || location.pathname === "/register";
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  return (
+    <div className={isAuthRoute ? "" : "dashboard-layout"}>
+      <Navbar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} theme={theme} toggleTheme={toggleTheme} />
+      <div className={isAuthRoute ? "" : `main-content ${sidebarOpen ? "" : "collapsed"}`}>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          {/* Protected Route */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Default Redirect */}
+          <Route
+            path="*"
+            element={
+              <Navigate
+                to={localStorage.getItem("token") ? "/dashboard" : "/login"}
+              />
+            }
+          />
+        </Routes>
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+
+  useEffect(() => {
+    document.body.className = theme === 'dark' ? 'theme-dark' : '';
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
+
   return (
     <Router>
-      <Navbar />
-
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* Protected Route */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
-
-        {/* Default Redirect */}
-        <Route
-          path="/"
-          element={
-            <Navigate
-              to={localStorage.getItem("token") ? "/dashboard" : "/login"}
-            />
-          }
-        />
-      </Routes>
+      <AppContent theme={theme} toggleTheme={toggleTheme} />
     </Router>
   );
 }

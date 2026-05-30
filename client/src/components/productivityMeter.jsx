@@ -18,22 +18,27 @@ function ProductivityMeter({ score }) {
   };
 
   return (
-    <div className="productivity-meter-card">
-      <h3 className="productivity-title">📊 Productivity Meter</h3>
-
-      <div className="productivity-bar-container">
+    <div style={{ marginTop: "1rem" }}>
+      <div style={{ 
+        width: "100%", 
+        height: "12px", 
+        background: "#e5e7eb", 
+        borderRadius: "20px", 
+        overflow: "hidden", 
+        marginBottom: "1rem" 
+      }}>
         <div
-          className="productivity-bar"
           style={{
+            height: "100%",
+            borderRadius: "20px",
             width: `${safeScore}%`,
             backgroundColor: getColor(),
+            transition: "width 0.4s ease"
           }}
-        >
-          {safeScore > 10 && <span>{safeScore}%</span>}
-        </div>
+        ></div>
       </div>
 
-      <div className="productivity-score" style={{ color: getColor() }}>
+      <div style={{ color: getColor(), fontWeight: "700", fontSize: "1.1rem" }}>
         {safeScore}% Productive ({getScoreLabel()})
       </div>
     </div>

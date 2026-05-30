@@ -80,7 +80,7 @@ function GoalManager({ refreshTrigger }) {
             </div>
 
             {showForm && (
-                <div style={{ background: "#f9fafb", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid #e5e7eb" }}>
+                <div style={{ background: "var(--hover-bg)", padding: "1.5rem", borderRadius: "12px", marginBottom: "1.5rem", border: "1px solid var(--border-color)" }}>
                     <form onSubmit={handleAddGoal} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                         <div style={{ gridColumn: "1 / -1" }}>
                             <label className="form-label">Goal Title</label>
@@ -143,7 +143,7 @@ function GoalManager({ refreshTrigger }) {
 
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                 {goals.length === 0 ? (
-                    <p style={{ color: "#6b7280", fontStyle: "italic", textAlign: "center" }}>You have no custom goals yet. Click 'Add Goal' to create one!</p>
+                    <p style={{ color: "var(--text-secondary)", fontStyle: "italic", textAlign: "center" }}>You have no custom goals yet. Click 'Add Goal' to create one!</p>
                 ) : (
                     goals.map(goal => {
                         const progressPercent = Math.min((goal.currentProgress / goal.targetTime) * 100, 100);
@@ -158,14 +158,14 @@ function GoalManager({ refreshTrigger }) {
                         return (
                             <div key={goal._id} style={{ position: "relative" }}>
                                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.5rem" }}>
-                                    <span style={{ fontWeight: "600", color: "#1f2937", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                                    <span style={{ fontWeight: "600", color: "var(--text-primary)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                                         {goal.title} 
-                                        <span style={{ fontSize: "0.75rem", background: "#e5e7eb", padding: "0.1rem 0.5rem", borderRadius: "10px", color: "#4b5563" }}>
+                                        <span style={{ fontSize: "0.75rem", background: "var(--border-color)", padding: "0.1rem 0.5rem", borderRadius: "10px", color: "var(--text-secondary)" }}>
                                             {goal.category} • {goal.timeframe}
                                         </span>
                                     </span>
                                     <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-                                        <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>
+                                        <span style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
                                             {goal.currentProgress} / {goal.targetTime} min
                                         </span>
                                         <button 
@@ -177,7 +177,7 @@ function GoalManager({ refreshTrigger }) {
                                         </button>
                                     </div>
                                 </div>
-                                <div style={{ width: "100%", height: "12px", background: "#e5e7eb", borderRadius: "10px", overflow: "hidden" }}>
+                                <div style={{ width: "100%", height: "12px", background: "var(--border-color)", borderRadius: "10px", overflow: "hidden" }}>
                                     <div style={{ width: `${progressPercent}%`, height: "100%", background: barColor, transition: "width 0.5s ease-out" }}></div>
                                 </div>
                             </div>

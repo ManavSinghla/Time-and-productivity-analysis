@@ -198,8 +198,8 @@ function AddTask({ onTaskAdded }) {
 
       {/* Stopwatch UI */}
       {entryMode === "stopwatch" && (
-        <div style={{ background: "#f3f4f6", padding: "1.5rem", borderRadius: "12px", textAlign: "center", marginTop: "1rem" }}>
-          <h3 style={{ fontSize: "3.5rem", margin: "0 0 1rem 0", color: "#1f2937", fontFamily: "monospace", letterSpacing: "2px" }}>
+        <div style={{ background: "var(--hover-bg)", padding: "1.5rem", borderRadius: "12px", textAlign: "center", marginTop: "1rem" }}>
+          <h3 style={{ fontSize: "3.5rem", margin: "0 0 1rem 0", color: "var(--text-primary)", fontFamily: "monospace", letterSpacing: "2px" }}>
             {formatTime(secondsElapsed)}
           </h3>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
@@ -216,11 +216,11 @@ function AddTask({ onTaskAdded }) {
 
       {/* Pomodoro UI */}
       {entryMode === "pomodoro" && (
-        <div style={{ background: pomoPhase === "focus" ? "#fee2e2" : "#d1fae5", padding: "1.5rem", borderRadius: "12px", textAlign: "center", marginTop: "1rem", transition: "background 0.3s" }}>
-          <h4 style={{ margin: 0, color: pomoPhase === "focus" ? "#991b1b" : "#065f46", fontSize: "1.3rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "1px" }}>
+        <div style={{ background: pomoPhase === "focus" ? "var(--bg-danger)" : "var(--bg-success)", padding: "1.5rem", borderRadius: "12px", textAlign: "center", marginTop: "1rem", transition: "background 0.3s" }}>
+          <h4 style={{ margin: 0, color: pomoPhase === "focus" ? "var(--text-danger)" : "var(--text-success)", fontSize: "1.3rem", fontWeight: "bold", textTransform: "uppercase", letterSpacing: "1px" }}>
             {pomoPhase === "focus" ? "🍅 Focus Time" : "☕ Break Time"}
           </h4>
-          <h3 style={{ fontSize: "3.5rem", margin: "0.5rem 0 1rem 0", color: "#1f2937", fontFamily: "monospace", letterSpacing: "2px" }}>
+          <h3 style={{ fontSize: "3.5rem", margin: "0.5rem 0 1rem 0", color: "var(--text-primary)", fontFamily: "monospace", letterSpacing: "2px" }}>
             {formatTime(pomoSecondsLeft)}
           </h3>
           <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>

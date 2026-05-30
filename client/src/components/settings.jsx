@@ -108,7 +108,7 @@ function Settings() {
                 <form onSubmit={handleProfileUpdate} style={{ display: "grid", gap: "1.5rem" }}>
                     <div>
                         <label className="form-label">Email (Read Only)</label>
-                        <input type="text" className="form-input" value={email} disabled style={{ background: "#f3f4f6", cursor: "not-allowed" }} />
+                        <input type="text" className="form-input" value={email} disabled style={{ background: "var(--hover-bg)", cursor: "not-allowed" }} />
                     </div>
                     <div>
                         <label className="form-label">Display Name</label>
@@ -148,9 +148,9 @@ function Settings() {
                 </form>
             </div>
 
-            <div className="analytics-container" style={{ maxWidth: "800px", margin: "0 auto", border: "2px solid #fee2e2", background: "#fff5f5" }}>
-                <h3 className="chart-title" style={{ color: "#dc2626" }}>⚠️ Danger Zone</h3>
-                <p style={{ color: "#991b1b", marginBottom: "1.5rem" }}>
+            <div className="analytics-container" style={{ maxWidth: "800px", margin: "0 auto", border: "2px solid var(--bg-danger)", background: "var(--bg-danger)" }}>
+                <h3 className="chart-title" style={{ color: "var(--text-danger)" }}>⚠️ Danger Zone</h3>
+                <p style={{ color: "var(--text-danger)", marginBottom: "1.5rem" }}>
                     Once you delete your account, there is no going back. All your tasks, goals, and analytics will be permanently erased.
                 </p>
                 <button type="button" className="btn btn-danger" onClick={handleDeleteAccount}>

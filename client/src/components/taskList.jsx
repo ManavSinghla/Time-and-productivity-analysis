@@ -57,20 +57,20 @@ function TaskList({ onTaskChange }) {
 
   const getCategoryClass = (category) => {
     const classes = {
-      Study: "category-study",
-      Work: "category-work",
-      Personal: "category-personal",
-      Other: "category-other",
+      Study: "pill-study",
+      Work: "pill-work",
+      Personal: "pill-personal",
+      Other: "pill-other",
     };
-    return classes[category] || classes.Other;
+    return classes[category] || "pill-other";
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ padding: 0 }}>
       <AddTask onTaskAdded={handleTaskAdded} />
 
-      <div className="task-list-container">
-        <h2 className="section-title">📋 Your Tasks</h2>
+      <div className="analytics-container">
+        <h2 className="chart-title">Tasks List</h2>
 
         {tasks.length === 0 ? (
           <div className="empty-state">
@@ -78,10 +78,18 @@ function TaskList({ onTaskChange }) {
           </div>
         ) : (
           <div>
+            <div className="task-table-header">
+              <div>Name</div>
+              <div>Category</div>
+              <div>Date</div>
+              <div>Time Spent</div>
+              <div style={{ textAlign: "right", paddingRight: "0.5rem" }}>Actions</div>
+            </div>
+            
             {tasks.map((task) => (
               <div key={task._id} className="task-item">
                 {editingId === task._id ? (
-                  <div className="task-edit-form">
+                  <div style={{ gridColumn: "1 / -1", display: "grid", gridTemplateColumns: "2fr 1fr 1fr auto auto", gap: "1rem" }}>
                     <input
                       type="text"
                       className="form-input"
@@ -118,44 +126,52 @@ function TaskList({ onTaskChange }) {
                     <button
                       className="btn btn-success"
                       onClick={() => handleUpdate(task._id)}
+                      style={{ padding: "0.5rem 1rem" }}
                     >
                       Save
                     </button>
 
                     <button
-                      className="btn btn-cancel"
+                      className="btn btn-secondary"
                       onClick={() => setEditingId(null)}
+                      style={{ padding: "0.5rem 1rem" }}
                     >
                       Cancel
                     </button>
                   </div>
                 ) : (
-                  <div className="task-content">
-                    <div className="task-info">
-                      <div className="task-title">{task.title}</div>
-                      <div className="task-meta">
-                        <span className={`task-category ${getCategoryClass(task.category)}`}>
-                          {task.category}
-                        </span>
-                        <span className="task-time">⏱️ {task.timeSpent} min</span>
-                      </div>
+                  <>
+                    <div className="task-title">{task.title}</div>
+                    
+                    <div>
+                      <span className={`task-pill ${getCategoryClass(task.category)}`}>
+                        {task.category}
+                      </span>
                     </div>
 
-                    <div className="task-actions">
+                    <div style={{ color: "var(--text-secondary)", fontSize: "0.95rem" }}>
+                      {new Date(task.date || task.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    </div>
+
+                    <div className="task-time">{task.timeSpent} min</div>
+
+                    <div style={{ display: "flex", gap: "0.5rem", justifyContent: "flex-end" }}>
                       <button
-                        className="btn btn-edit"
+                        className="btn-icon"
                         onClick={() => startEdit(task)}
+                        title="Edit"
                       >
-                        ✏️ Edit
+                        ✏️
                       </button>
                       <button
-                        className="btn btn-delete"
+                        className="btn-icon"
                         onClick={() => handleDelete(task._id)}
+                        title="Delete"
                       >
-                        🗑️ Delete
+                        🗑️
                       </button>
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             ))}

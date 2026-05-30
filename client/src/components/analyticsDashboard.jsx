@@ -159,31 +159,36 @@ function AnalyticsDashboard({ refreshTrigger }) {
     };
     const insights = getSmartInsights();
 
-    return (
-        <div className="container">
-            <div className="analytics-container">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
-                    <div>
-                        <h1 className="analytics-header">📈 Analytics Dashboard</h1>
-                        {userName && (
-                            <p className="analytics-subtitle" style={{ marginTop: "0.5rem", fontSize: "1.1rem", fontWeight: "600", color: "#667eea" }}>
-                                Welcome back, <span style={{ textTransform: "capitalize" }}>{userName}</span>! 👋
-                            </p>
-                        )}
-                    </div>
-                    <button 
-                        onClick={handleExportCSV}
-                        className="btn btn-secondary"
-                        style={{ display: "flex", alignItems: "center", gap: "0.5rem", border: "2px solid #667eea" }}
-                    >
-                        📥 Export to CSV
-                    </button>
-                </div>
-                <p className="analytics-subtitle">Track your productivity and time management</p>
+    const handleNotificationsClick = () => {
+        if (insights.length > 0) {
+            alert(`You have ${insights.length} new insights!\n\n${insights.map(i => `${i.icon} ${i.text}`).join('\n')}`);
+        } else {
+            alert("No new notifications at the moment!");
+        }
+    };
 
-                {insights.length > 0 && (
-                    <div style={{ background: "#f8fafc", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "1rem", marginBottom: "2rem" }}>
-                        <h4 style={{ margin: "0 0 1rem 0", color: "#475569", fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+    return (
+        <div className="container" style={{ padding: 0 }}>
+            {/* Top Bar */}
+            <div className="top-bar">
+                <div>
+                    <h1 className="welcome-text">
+                        Welcome, <span style={{ textTransform: "capitalize" }}>{userName || "User"}</span>!
+                    </h1>
+                    <p className="welcome-sub">Automate tasks and achieve more every day.</p>
+                </div>
+                <div className="top-actions">
+                    <div className="pill-badge">
+                        {todayTotal > 0 ? "🔥 You're active today" : "💤 Start your first task"}
+                    </div>
+                    <button className="btn-icon" onClick={handleNotificationsClick} title="Notifications">🔔</button>
+                    <button className="btn-icon btn-icon-dark" onClick={handleExportCSV} title="Export to CSV">📥</button>
+                </div>
+            </div>
+
+            {insights.length > 0 && (
+                    <div style={{ background: "var(--hover-bg)", border: "1px solid var(--border-color)", borderRadius: "12px", padding: "1rem", marginBottom: "2rem" }}>
+                        <h4 style={{ margin: "0 0 1rem 0", color: "var(--text-secondary)", fontSize: "1.1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
                             💡 Smart Reminders
                         </h4>
                         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
@@ -193,8 +198,8 @@ function AnalyticsDashboard({ refreshTrigger }) {
                                     alignItems: "center", 
                                     gap: "0.75rem",
                                     padding: "0.75rem 1rem",
-                                    background: insight.type === "warning" ? "#fffbeb" : insight.type === "success" ? "#f0fdf4" : "#eff6ff",
-                                    color: insight.type === "warning" ? "#b45309" : insight.type === "success" ? "#166534" : "#1e40af",
+                                    background: insight.type === "warning" ? "var(--bg-warning)" : insight.type === "success" ? "var(--bg-success)" : "var(--bg-info)",
+                                    color: insight.type === "warning" ? "var(--text-warning)" : insight.type === "success" ? "var(--text-success)" : "var(--text-info)",
                                     borderRadius: "8px",
                                     borderLeft: `4px solid ${insight.type === "warning" ? "#f59e0b" : insight.type === "success" ? "#22c55e" : "#3b82f6"}`
                                 }}>
@@ -206,154 +211,142 @@ function AnalyticsDashboard({ refreshTrigger }) {
                     </div>
                 )}
 
-                <div className="timeframe-toggle">
-                    <button
-                        className={timeframe === "today" ? "timeframe-btn active" : "timeframe-btn"}
-                        onClick={() => setTimeframe("today")}
-                    >
-                        📅 Today
-                    </button>
-                    <button
-                        className={timeframe === "week" ? "timeframe-btn active" : "timeframe-btn"}
-                        onClick={() => setTimeframe("week")}
-                    >
-                        📆 This Week
-                    </button>
-                </div>
-
-                {productivity && (
-                    <>
-                        <ProductivityMeter score={productivity.productivityScore} />
-                        <div className="productivity-info">
-                            <p>
-                                Productive Time: <strong>{productivity.productiveTime}</strong> /{" "}
-                                <strong>{productivity.totalTime}</strong> minutes
-                            </p>
-                        </div>
-                    </>
-                )}
-
-                <div className="stats-card">
-                    <h3 className="stats-title">⏱️ Total Time Today</h3>
-                    <p className="stats-value">{todayTotal} minutes</p>
-                </div>
-            </div>
-
-            <GoalManager refreshTrigger={refreshTrigger} />
-
-            {gamification && (
-                <div className="analytics-container">
-                    <h3 className="chart-title">🎮 Your Achievements</h3>
+                <div className="dashboard-grid">
+                
+                {/* Left Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
                     
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', marginBottom: '2rem' }}>
-                        <div className="stats-card" style={{ flex: '1', minWidth: '200px', margin: 0, background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
-                            <h3 className="stats-title">🔥 Current Streak</h3>
-                            <p className="stats-value">{gamification.currentStreak} Days</p>
+                    <GoalManager refreshTrigger={refreshTrigger} />
+
+                    <div className="analytics-container" style={{ margin: 0 }}>
+                        <div className="timeframe-toggle" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", display: "flex" }}>
+                            <h3 className="chart-title" style={{ margin: 0 }}>Productivity</h3>
+                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                                <button
+                                    className={timeframe === "today" ? "timeframe-btn active" : "timeframe-btn"}
+                                    onClick={() => setTimeframe("today")}
+                                >
+                                    Today
+                                </button>
+                                <button
+                                    className={timeframe === "week" ? "timeframe-btn active" : "timeframe-btn"}
+                                    onClick={() => setTimeframe("week")}
+                                >
+                                    Week
+                                </button>
+                            </div>
                         </div>
-                        <div className="stats-card" style={{ flex: '1', minWidth: '200px', margin: 0, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
-                            <h3 className="stats-title">⏱️ Total Logged</h3>
-                            <p className="stats-value" style={{ fontSize: '2.5rem' }}>{Math.floor(gamification.totalTimeLogged / 60)}h {gamification.totalTimeLogged % 60}m</p>
+
+                        {productivity && (
+                            <>
+                                <ProductivityMeter score={productivity.productivityScore} />
+                                <div style={{ 
+                                    background: "rgba(96, 165, 250, 0.1)", 
+                                    padding: "1rem", 
+                                    borderRadius: "12px", 
+                                    textAlign: "center",
+                                    color: "var(--accent-blue)",
+                                    fontWeight: "600",
+                                    marginTop: "1rem"
+                                }}>
+                                    Productive Time: {productivity.productiveTime} / {productivity.totalTime} minutes
+                                </div>
+                            </>
+                        )}
+                        
+                        <div style={{ 
+                            background: "rgba(129, 140, 248, 0.1)", 
+                            padding: "1rem", 
+                            borderRadius: "12px", 
+                            textAlign: "center",
+                            color: "var(--accent-indigo)",
+                            fontWeight: "600",
+                            marginTop: "1rem"
+                        }}>
+                            Total Time Today: {todayTotal} minutes
                         </div>
                     </div>
+                </div>
 
-                    <h4 style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#374151' }}>Badges Earned ({gamification.badges.length})</h4>
-                    <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                        {gamification.badges.map((badge, idx) => (
-                            <div key={idx} style={{ 
-                                background: '#f3f4f6', 
-                                padding: '1rem', 
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1rem',
-                                border: '2px solid #e5e7eb',
-                                minWidth: '250px'
-                            }}>
-                                <span style={{ fontSize: '2.5rem' }}>{badge.icon}</span>
-                                <div>
-                                    <p style={{ fontWeight: 'bold', margin: 0, color: '#1f2937' }}>{badge.name}</p>
-                                    <p style={{ margin: 0, fontSize: '0.9rem', color: '#6b7280' }}>{badge.description}</p>
+                {/* Right Column */}
+                <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+                    
+                    {gamification && (
+                        <div className="analytics-container" style={{ margin: 0 }}>
+                            <h3 className="chart-title">🎮 Achievements</h3>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: "1fr 1fr", gap: '1rem', marginBottom: '1.5rem' }}>
+                                <div style={{ background: 'rgba(129, 140, 248, 0.1)', padding: "1.5rem", borderRadius: "16px", color: "var(--accent-indigo)" }}>
+                                    <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "1px" }}>Current Streak</h4>
+                                    <p style={{ margin: 0, fontSize: "2rem", fontWeight: "800" }}>{gamification.currentStreak} <span style={{fontSize:"1rem"}}>Days</span></p>
+                                </div>
+                                <div style={{ background: 'var(--bg-success)', padding: "1.5rem", borderRadius: "16px", color: "var(--text-success)" }}>
+                                    <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "1px" }}>Total Logged</h4>
+                                    <p style={{ margin: 0, fontSize: "2rem", fontWeight: "800" }}>{Math.floor(gamification.totalTimeLogged / 60)}<span style={{fontSize:"1rem"}}>h</span> {gamification.totalTimeLogged % 60}<span style={{fontSize:"1rem"}}>m</span></p>
                                 </div>
                             </div>
-                        ))}
-                        {gamification.badges.length === 0 && (
-                            <p style={{ color: '#6b7280', fontStyle: 'italic' }}>Complete tasks to earn your first badge!</p>
+
+                            <h4 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Badges Earned ({gamification.badges.length})</h4>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                {gamification.badges.map((badge, idx) => (
+                                    <div key={idx} style={{ 
+                                        background: 'var(--hover-bg)', 
+                                        padding: '0.75rem', 
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem',
+                                        border: '1px solid var(--border-color)',
+                                        flex: "1 1 calc(50% - 0.5rem)"
+                                    }}>
+                                        <span style={{ fontSize: '1.5rem' }}>{badge.icon}</span>
+                                        <div>
+                                            <p style={{ fontWeight: 'bold', margin: 0, color: 'var(--text-primary)', fontSize: "0.9rem" }}>{badge.name}</p>
+                                            <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{badge.description}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                                {gamification.badges.length === 0 && (
+                                    <p style={{ color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: "0.9rem" }}>Complete tasks to earn your first badge!</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="analytics-container" style={{ margin: 0 }}>
+                        <h3 className="chart-title">📊 Time Spent by Category</h3>
+                        {categoryData.length > 0 ? (
+                            <div style={{ height: "300px" }}>
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={categoryData}
+                                            dataKey="totalTime"
+                                            nameKey="_id"
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={100}
+                                            label
+                                        >
+                                            {categoryData.map((entry, index) => (
+                                                <Cell
+                                                    key={index}
+                                                    fill={COLORS[index % COLORS.length]}
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                        ) : (
+                            <div className="empty-state">
+                                <p>No category data available</p>
+                            </div>
                         )}
                     </div>
+
                 </div>
-            )}
-
-            <div className="analytics-container">
-                <h3 className="chart-title">📊 Time Spent by Category</h3>
-                {categoryData.length > 0 ? (
-                    <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
-                                <Pie
-                                    data={categoryData}
-                                    dataKey="totalTime"
-                                    nameKey="_id"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={100}
-                                    label
-                                >
-                                    {categoryData.map((entry, index) => (
-                                        <Cell
-                                            key={index}
-                                            fill={COLORS[index % COLORS.length]}
-                                        />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <p>No category data available</p>
-                    </div>
-                )}
-            </div>
-
-            <div className="analytics-container">
-                <h3 className="chart-title">📅 Daily Productivity</h3>
-                {dailyData.length > 0 ? (
-                    <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={dailyData}>
-                                <XAxis dataKey="_id" />
-                                <YAxis />
-                                <Tooltip />
-                                <Bar dataKey="totalTime" fill="#667eea" />
-                            </BarChart>
-                        </ResponsiveContainer>
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <p>No daily data available</p>
-                    </div>
-                )}
-            </div>
-
-            <div className="analytics-container">
-                <h3 className="chart-title">📈 Weekly Productivity Trend</h3>
-                {weeklyData.length > 0 ? (
-                    <div className="chart-container">
-                        <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={weeklyData}>
-                                <XAxis dataKey="_id" />
-                                <YAxis />
-                                <Tooltip />
-                                <Line type="monotone" dataKey="totalTime" stroke="#667eea" strokeWidth={3} />
-                            </LineChart>
-                        </ResponsiveContainer>
-                    </div>
-                ) : (
-                    <div className="empty-state">
-                        <p>No weekly data available</p>
-                    </div>
-                )}
             </div>
         </div>
     );
