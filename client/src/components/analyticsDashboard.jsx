@@ -221,7 +221,7 @@ function AnalyticsDashboard({ refreshTrigger }) {
                     <div className="analytics-container" style={{ margin: 0 }}>
                         <div className="timeframe-toggle" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", display: "flex" }}>
                             <h3 className="chart-title" style={{ margin: 0 }}>Productivity</h3>
-                            <div style={{ display: "flex", gap: "0.5rem" }}>
+                            <div className="timeframe-group">
                                 <button
                                     className={timeframe === "today" ? "timeframe-btn active" : "timeframe-btn"}
                                     onClick={() => setTimeframe("today")}

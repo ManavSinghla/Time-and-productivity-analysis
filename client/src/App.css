@@ -431,36 +431,76 @@ body {
 .theme-dark .rbc-event { background-color: var(--accent-indigo); }
 .theme-dark .rbc-agenda-date-cell, .theme-dark .rbc-agenda-time-cell { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
 
+/* Timeframe Segment Controls (Dashboard) */
+.timeframe-group {
+  display: inline-flex;
+  background: var(--input-bg);
+  padding: 0.35rem;
+  border-radius: 12px;
+  gap: 0.2rem;
+  border: 1px solid var(--border-color);
+}
+.timeframe-btn {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: none;
+}
+.timeframe-btn:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+.timeframe-btn.active {
+  background: var(--card-bg);
+  color: var(--accent-indigo) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.timeframe-btn.active:hover {
+  background: var(--card-bg);
+}
+
 /* Calendar UI Improvements */
 .rbc-calendar {
   font-family: inherit;
 }
-.rbc-toolbar button {
-  color: var(--text-primary);
-  background: var(--card-bg);
+.rbc-toolbar {
+  margin-bottom: 1.5rem !important;
+}
+.rbc-btn-group {
+  display: inline-flex;
+  background: var(--input-bg);
+  padding: 0.35rem;
+  border-radius: 12px;
+  gap: 0.2rem;
   border: 1px solid var(--border-color);
-  padding: 0.6rem 1.2rem;
-  border-radius: 10px;
+}
+.rbc-toolbar button {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+  font-weight: 700;
+  transition: all 0.2s ease;
+  box-shadow: none;
 }
 .rbc-toolbar button:hover {
+  color: var(--text-primary);
   background: var(--hover-bg);
-  transform: translateY(-1px);
-}
-.rbc-toolbar button:active {
-  transform: translateY(0);
 }
 .rbc-toolbar button.rbc-active {
-  background: var(--accent-gradient);
-  color: white !important;
-  border-color: transparent;
-  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+  background: var(--card-bg);
+  color: var(--accent-indigo) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .rbc-toolbar button.rbc-active:hover {
-  background: var(--accent-gradient);
+  background: var(--card-bg);
 }
 .rbc-toolbar .rbc-toolbar-label {
   font-weight: 800;
