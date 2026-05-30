@@ -43,23 +43,70 @@ function CalendarView({ refreshTrigger }) {
     const [timeSpent, setTimeSpent] = useState(30);
     const [description, setDescription] = useState('');
     const [taskDate, setTaskDate] = useState('');
+    const [priority, setPriority] = useState('Medium');
+    const [recurrence, setRecurrence] = useState('none');
+    const [subTasks, setSubTasks] = useState([]);
+    const [newSubTaskTitle, setNewSubTaskTitle] = useState('');
 
     useEffect(() => {
         const loadTasks = async () => {
             try {
                 const data = await fetchTasks();
-                const calendarEvents = data.map(task => {
+                const calendarEvents = [];
+                
+                data.forEach(task => {
                     const taskDateObj = new Date(task.date || task.createdAt);
-                    return {
+                    const baseEvent = {
                         id: task._id,
                         title: task.title,
                         start: taskDateObj,
-                        end: new Date(taskDateObj.getTime() + task.timeSpent * 60000), // add timeSpent minutes
+                        end: new Date(taskDateObj.getTime() + task.timeSpent * 60000),
                         category: task.category || 'Other',
                         timeSpent: task.timeSpent,
                         description: task.description || '',
+                        priority: task.priority || 'Medium',
+                        recurrence: task.recurrence || { type: 'none' },
+                        subTasks: task.subTasks || [],
                         allDay: false
                     };
+                    
+                    // Add the base event
+                    calendarEvents.push(baseEvent);
+                    
+                    // Generate virtual events if task is recurring
+                    if (task.recurrence && task.recurrence.type !== 'none') {
+                        const recurrenceType = task.recurrence.type;
+                        const startRange = new Date(date.getFullYear(), date.getMonth() - 1, 1);
+                        const endRange = new Date(date.getFullYear(), date.getMonth() + 3, 1);
+                        
+                        let currentOccur = new Date(taskDateObj);
+                        
+                        // We loop forward up to 3 months from current calendar view date
+                        while (true) {
+                            if (recurrenceType === 'daily') {
+                                currentOccur.setDate(currentOccur.getDate() + 1);
+                            } else if (recurrenceType === 'weekly') {
+                                currentOccur.setDate(currentOccur.getDate() + 7);
+                            } else {
+                                break;
+                            }
+                            
+                            if (currentOccur > endRange) break;
+                            
+                            // Only add if it's within startRange to endRange
+                            if (currentOccur >= startRange) {
+                                calendarEvents.push({
+                                    ...baseEvent,
+                                    id: `${task._id}-virtual-${currentOccur.getTime()}`,
+                                    baseTaskId: task._id,
+                                    title: `${task.title} 🔁`,
+                                    start: new Date(currentOccur),
+                                    end: new Date(currentOccur.getTime() + task.timeSpent * 60000),
+                                    isVirtual: true
+                                });
+                            }
+                        }
+                    }
                 });
                 setEvents(calendarEvents);
             } catch (error) {
@@ -67,7 +114,7 @@ function CalendarView({ refreshTrigger }) {
             }
         };
         loadTasks();
-    }, [refreshTrigger, localTrigger]);
+    }, [refreshTrigger, localTrigger, date]);
 
     const eventStyleGetter = (event) => {
         let backgroundColor = 'var(--accent-blue)';
@@ -76,6 +123,10 @@ function CalendarView({ refreshTrigger }) {
         if (event.category === 'Personal') backgroundColor = '#2ecc71';
         if (event.category === 'Other') backgroundColor = 'var(--text-secondary)';
         
+        let borderLeft = '4px solid #f59e0b'; // Default Medium
+        if (event.priority === 'Low') borderLeft = '4px solid #60a5fa';
+        if (event.priority === 'High') borderLeft = '4px solid #ef4444';
+
         return {
             style: {
                 backgroundColor,
@@ -83,6 +134,7 @@ function CalendarView({ refreshTrigger }) {
                 opacity: 0.9,
                 color: 'white',
                 border: 'none',
+                borderLeft,
                 display: 'block'
             }
         };
@@ -93,6 +145,11 @@ function CalendarView({ refreshTrigger }) {
         setTitle('');
         setCategory('Study');
         setDescription('');
+        setPriority('Medium');
+        setRecurrence('none');
+        setSubTasks([]);
+        setNewSubTaskTitle('');
+        
         // Calculate difference in minutes for default time spent
         const diffMs = end - start;
         const diffMins = Math.max(15, Math.round(diffMs / 60000));
@@ -109,10 +166,14 @@ function CalendarView({ refreshTrigger }) {
 
     const handleSelectEvent = (event) => {
         setSelectedEvent(event);
-        setTitle(event.title);
+        setTitle(event.title.replace(' 🔁', ''));
         setCategory(event.category);
         setTimeSpent(event.timeSpent);
         setDescription(event.description || '');
+        setPriority(event.priority || 'Medium');
+        setRecurrence(event.recurrence?.type || 'none');
+        setSubTasks(event.subTasks || []);
+        setNewSubTaskTitle('');
         
         const dateObj = new Date(event.start);
         const year = dateObj.getFullYear();
@@ -122,6 +183,31 @@ function CalendarView({ refreshTrigger }) {
 
         setIsEditMode(false);
         setIsDetailModalOpen(true);
+    };
+
+    const handleAddSubTask = () => {
+        if (!newSubTaskTitle.trim()) return;
+        setSubTasks([...subTasks, { title: newSubTaskTitle.trim(), completed: false }]);
+        setNewSubTaskTitle('');
+    };
+
+    const handleRemoveSubTask = (index) => {
+        setSubTasks(subTasks.filter((_, i) => i !== index));
+    };
+
+    const handleToggleSubtask = async (subtaskIndex) => {
+        if (!selectedEvent) return;
+        const taskId = selectedEvent.isVirtual ? selectedEvent.baseTaskId : selectedEvent.id;
+        const updatedSubTasks = subTasks.map((st, idx) => 
+            idx === subtaskIndex ? { ...st, completed: !st.completed } : st
+        );
+        setSubTasks(updatedSubTasks);
+        try {
+            await updateTask(taskId, { subTasks: updatedSubTasks });
+            setLocalTrigger(prev => prev + 1);
+        } catch (error) {
+            console.error("Error toggling subtask:", error);
+        }
     };
 
     const handleCreateSubmit = async (e) => {
@@ -144,6 +230,9 @@ function CalendarView({ refreshTrigger }) {
                 timeSpent: Number(timeSpent),
                 category,
                 description,
+                priority,
+                recurrence: { type: recurrence },
+                subTasks,
                 date: finalDate
             });
 
@@ -158,6 +247,7 @@ function CalendarView({ refreshTrigger }) {
         e.preventDefault();
         if (!title.trim() || !selectedEvent) return;
 
+        const taskId = selectedEvent.isVirtual ? selectedEvent.baseTaskId : selectedEvent.id;
         try {
             const baseDate = new Date(selectedEvent.start);
             const [y, m, d] = taskDate.split('-').map(Number);
@@ -167,11 +257,14 @@ function CalendarView({ refreshTrigger }) {
                 baseDate.setDate(d);
             }
 
-            await updateTask(selectedEvent.id, {
+            await updateTask(taskId, {
                 title,
                 timeSpent: Number(timeSpent),
                 category,
                 description,
+                priority,
+                recurrence: { type: recurrence },
+                subTasks,
                 date: baseDate
             });
 
@@ -185,9 +278,11 @@ function CalendarView({ refreshTrigger }) {
 
     const handleDelete = async () => {
         if (!selectedEvent) return;
-        if (window.confirm(`Are you sure you want to delete "${selectedEvent.title}"?`)) {
+        const taskId = selectedEvent.isVirtual ? selectedEvent.baseTaskId : selectedEvent.id;
+        const displayTitle = selectedEvent.title.replace(' 🔁', '');
+        if (window.confirm(`Are you sure you want to delete "${displayTitle}"?`)) {
             try {
-                await deleteTask(selectedEvent.id);
+                await deleteTask(taskId);
                 setIsDetailModalOpen(false);
                 setLocalTrigger(prev => prev + 1);
             } catch (error) {
@@ -267,6 +362,35 @@ function CalendarView({ refreshTrigger }) {
                                 </div>
                             </div>
 
+                            <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label className="form-label" htmlFor="calendar-task-priority">Priority</label>
+                                    <select 
+                                        id="calendar-task-priority"
+                                        className="form-select" 
+                                        value={priority} 
+                                        onChange={(e) => setPriority(e.target.value)}
+                                    >
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="form-label" htmlFor="calendar-task-recurrence">Recurrence</label>
+                                    <select 
+                                        id="calendar-task-recurrence"
+                                        className="form-select" 
+                                        value={recurrence} 
+                                        onChange={(e) => setRecurrence(e.target.value)}
+                                    >
+                                        <option value="none">None</option>
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly">Weekly</option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <div className="form-group">
                                 <label className="form-label" htmlFor="calendar-task-date">Date</label>
                                 <input 
@@ -289,6 +413,43 @@ function CalendarView({ refreshTrigger }) {
                                     placeholder="Add descriptions or notes..."
                                     style={{ fontFamily: 'inherit', resize: 'vertical' }}
                                 />
+                            </div>
+
+                            <div className="subtasks-container" style={{ gridColumn: 'auto' }}>
+                                <label className="form-label">Checklist / Sub-tasks</label>
+                                <div className="subtask-builder">
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Add a checklist step..."
+                                        value={newSubTaskTitle}
+                                        onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={handleAddSubTask}
+                                        style={{ padding: "0.5rem 1rem", minWidth: "80px" }}
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                                {subTasks.length > 0 && (
+                                    <ul className="subtask-list">
+                                        {subTasks.map((st, idx) => (
+                                            <li key={idx} className="subtask-item" style={{ justifyContent: "space-between" }}>
+                                                <span>• {st.title}</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveSubTask(idx)}
+                                                    style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "1.1rem", padding: 0 }}
+                                                >
+                                                    ×
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
                             </div>
 
                             <div className="modal-actions">
@@ -352,6 +513,35 @@ function CalendarView({ refreshTrigger }) {
                                     </div>
                                 </div>
 
+                                <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <div>
+                                        <label className="form-label" htmlFor="edit-task-priority">Priority</label>
+                                        <select 
+                                            id="edit-task-priority"
+                                            className="form-select" 
+                                            value={priority} 
+                                            onChange={(e) => setPriority(e.target.value)}
+                                        >
+                                            <option value="Low">Low</option>
+                                            <option value="Medium">Medium</option>
+                                            <option value="High">High</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="form-label" htmlFor="edit-task-recurrence">Recurrence</label>
+                                        <select 
+                                            id="edit-task-recurrence"
+                                            className="form-select" 
+                                            value={recurrence} 
+                                            onChange={(e) => setRecurrence(e.target.value)}
+                                        >
+                                            <option value="none">None</option>
+                                            <option value="daily">Daily</option>
+                                            <option value="weekly">Weekly</option>
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div className="form-group">
                                     <label className="form-label" htmlFor="edit-task-date">Date</label>
                                     <input 
@@ -375,6 +565,43 @@ function CalendarView({ refreshTrigger }) {
                                     />
                                 </div>
 
+                                <div className="subtasks-container" style={{ gridColumn: 'auto' }}>
+                                    <label className="form-label">Checklist / Sub-tasks</label>
+                                    <div className="subtask-builder">
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="Add a checklist step..."
+                                            value={newSubTaskTitle}
+                                            onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                                        />
+                                        <button
+                                            type="button"
+                                            className="btn btn-secondary"
+                                            onClick={handleAddSubTask}
+                                            style={{ padding: "0.5rem 1rem", minWidth: "80px" }}
+                                        >
+                                            Add
+                                        </button>
+                                    </div>
+                                    {subTasks.length > 0 && (
+                                        <ul className="subtask-list">
+                                            {subTasks.map((st, idx) => (
+                                                <li key={idx} className="subtask-item" style={{ justifyContent: "space-between" }}>
+                                                    <span>• {st.title}</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveSubTask(idx)}
+                                                        style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "1.1rem", padding: 0 }}
+                                                    >
+                                                        ×
+                                                    </button>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+
                                 <div className="modal-actions">
                                     <button type="button" className="btn btn-secondary" onClick={() => setIsEditMode(false)}>Back</button>
                                     <button type="submit" className="btn btn-primary">Save Changes</button>
@@ -384,7 +611,14 @@ function CalendarView({ refreshTrigger }) {
                             <div>
                                 <div className="detail-row">
                                     <span className="detail-label">Title</span>
-                                    <span className="detail-value">{selectedEvent.title}</span>
+                                    <span className="detail-value">
+                                        {selectedEvent.title.replace(' 🔁', '')}
+                                        {selectedEvent.recurrence?.type && selectedEvent.recurrence.type !== 'none' && (
+                                            <span className="recurrence-badge" style={{ marginLeft: "0.5rem", verticalAlign: "middle" }}>
+                                                🔁 {selectedEvent.recurrence.type}
+                                            </span>
+                                        )}
+                                    </span>
                                 </div>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
@@ -397,16 +631,26 @@ function CalendarView({ refreshTrigger }) {
                                         </span>
                                     </div>
                                     <div className="detail-row" style={{ marginBottom: 0 }}>
-                                        <span className="detail-label">Duration</span>
-                                        <span className="detail-value">{selectedEvent.timeSpent} mins</span>
+                                        <span className="detail-label">Priority</span>
+                                        <span className="detail-value">
+                                            <span className={`task-pill pill-priority-${(selectedEvent.priority || 'medium').toLowerCase()}`}>
+                                                {selectedEvent.priority || 'Medium'}
+                                            </span>
+                                        </span>
                                     </div>
                                 </div>
 
-                                <div className="detail-row">
-                                    <span className="detail-label">Date & Time</span>
-                                    <span className="detail-value" style={{ fontSize: '0.95rem' }}>
-                                        {format(selectedEvent.start, 'PPP p')}
-                                    </span>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.2rem' }}>
+                                    <div className="detail-row" style={{ marginBottom: 0 }}>
+                                        <span className="detail-label">Duration</span>
+                                        <span className="detail-value">{selectedEvent.timeSpent} mins</span>
+                                    </div>
+                                    <div className="detail-row" style={{ marginBottom: 0 }}>
+                                        <span className="detail-label">Date & Time</span>
+                                        <span className="detail-value" style={{ fontSize: '0.95rem' }}>
+                                            {format(selectedEvent.start, 'PPP p')}
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {selectedEvent.description && (
@@ -415,6 +659,34 @@ function CalendarView({ refreshTrigger }) {
                                         <span className="detail-value" style={{ fontWeight: 'normal', fontSize: '0.95rem', background: 'var(--hover-bg)', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                                             {selectedEvent.description}
                                         </span>
+                                    </div>
+                                )}
+
+                                {/* Subtasks Checklist */}
+                                {subTasks.length > 0 && (
+                                    <div className="subtasks-container" style={{ gridColumn: 'auto', marginBottom: '1.5rem' }}>
+                                        <div className="subtask-header">
+                                            <span>Checklist ({subTasks.filter(st => st.completed).length} / {subTasks.length})</span>
+                                            <span style={{ fontSize: "0.8rem", color: "var(--accent-indigo)" }}>
+                                                {Math.round((subTasks.filter(st => st.completed).length / subTasks.length) * 100)}% Complete
+                                            </span>
+                                        </div>
+                                        <ul className="subtask-list">
+                                            {subTasks.map((st, idx) => (
+                                                <li 
+                                                    key={idx} 
+                                                    className={`subtask-item ${st.completed ? 'completed' : ''}`}
+                                                    onClick={() => handleToggleSubtask(idx)}
+                                                >
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={st.completed} 
+                                                        onChange={() => {}} 
+                                                    />
+                                                    <span>{st.title}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
                                 )}
 

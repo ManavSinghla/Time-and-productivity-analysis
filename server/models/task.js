@@ -28,7 +28,34 @@ const taskSchema = new mongoose.Schema(
         date: {
             type: Date,
             default: Date.now
-        }
+        },
+        priority: {
+            type: String,
+            enum: ["Low", "Medium", "High"],
+            default: "Medium"
+        },
+        recurrence: {
+            type: {
+                type: String,
+                enum: ["none", "daily", "weekly"],
+                default: "none"
+            },
+            days: [{
+                type: Number
+            }]
+        },
+        subTasks: [
+            {
+                title: {
+                    type: String,
+                    required: true
+                },
+                completed: {
+                    type: Boolean,
+                    default: false
+                }
+            }
+        ]
     },
     {
         timestamps: true

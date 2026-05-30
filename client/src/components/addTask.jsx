@@ -6,9 +6,23 @@ function AddTask({ onTaskAdded }) {
   const [title, setTitle] = useState("");
   const [timeSpent, setTimeSpent] = useState("");
   const [category, setCategory] = useState("Study");
+  const [priority, setPriority] = useState("Medium");
+  const [recurrence, setRecurrence] = useState("none");
+  const [subTasks, setSubTasks] = useState([]);
+  const [newSubTaskTitle, setNewSubTaskTitle] = useState("");
 
   // Modes: manual, stopwatch, pomodoro
   const [entryMode, setEntryMode] = useState("manual");
+
+  const handleAddSubTask = () => {
+    if (!newSubTaskTitle.trim()) return;
+    setSubTasks([...subTasks, { title: newSubTaskTitle.trim(), completed: false }]);
+    setNewSubTaskTitle("");
+  };
+
+  const handleRemoveSubTask = (index) => {
+    setSubTasks(subTasks.filter((_, i) => i !== index));
+  };
 
   // Stopwatch state
   const [secondsElapsed, setSecondsElapsed] = useState(0);
@@ -92,6 +106,10 @@ function AddTask({ onTaskAdded }) {
     setTitle("");
     setTimeSpent("");
     setCategory("Study");
+    setPriority("Medium");
+    setRecurrence("none");
+    setSubTasks([]);
+    setNewSubTaskTitle("");
     setSecondsElapsed(0);
     setIsStopwatchRunning(false);
     setIsPomoRunning(false);
@@ -110,6 +128,9 @@ function AddTask({ onTaskAdded }) {
       title,
       timeSpent: Number(timeSpent),
       category,
+      priority,
+      recurrence: { type: recurrence },
+      subTasks,
     });
     resetForm();
   };
@@ -186,11 +207,87 @@ function AddTask({ onTaskAdded }) {
                 required
               />
             </div>
+            
+            <div>
+              <label className="form-label" htmlFor="priority">Priority</label>
+              <select
+                id="priority"
+                className="form-select"
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+              >
+                <option value="Low">🟢 Low</option>
+                <option value="Medium">🟡 Medium</option>
+                <option value="High">🔴 High</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="form-label" htmlFor="recurrence">Recurrence</label>
+              <select
+                id="recurrence"
+                className="form-select"
+                value={recurrence}
+                onChange={(e) => setRecurrence(e.target.value)}
+              >
+                <option value="none">🔁 None</option>
+                <option value="daily">📅 Daily</option>
+                <option value="weekly">📅 Weekly</option>
+              </select>
+            </div>
+
             <div>
               <label className="form-label" style={{ visibility: "hidden" }}>Submit</label>
               <button type="submit" className="btn btn-primary" style={{ width: "100%" }}>
                 Add Task
               </button>
+            </div>
+
+            <div className="subtasks-container">
+              <label className="form-label">Checklist / Sub-tasks</label>
+              <div className="subtask-builder">
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Add a checkable step..."
+                  value={newSubTaskTitle}
+                  onChange={(e) => setNewSubTaskTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddSubTask();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleAddSubTask}
+                  style={{ padding: "0.5rem 1rem", minWidth: "80px" }}
+                >
+                  Add
+                </button>
+              </div>
+              {subTasks.length > 0 && (
+                <ul className="subtask-list">
+                  {subTasks.map((st, idx) => (
+                    <li key={idx} className="subtask-item" style={{ justifyContent: "space-between" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span style={{ color: "var(--accent-indigo)" }}>•</span>
+                        {st.title}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSubTask(idx)}
+                        style={{ background: "transparent", border: "none", color: "#ef4444", cursor: "pointer", fontSize: "1.1rem", padding: 0 }}
+                        title="Remove step"
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </>
         )}

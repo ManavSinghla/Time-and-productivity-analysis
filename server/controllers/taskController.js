@@ -3,7 +3,7 @@ import Task from "../models/task.js";
 // @desc   Create a new task
 // @route  POST /api/tasks
 export const createTask = async (req, res) => {
-    const { title, description, timeSpent, category, date } = req.body;
+    const { title, description, timeSpent, category, date, priority, recurrence, subTasks } = req.body;
     if (!title || !timeSpent) {
         return res.status(400).json({ message: "Title and timeSpent are required" });
     }
@@ -13,7 +13,10 @@ export const createTask = async (req, res) => {
         description,
         timeSpent,
         category,
-        date
+        date,
+        priority,
+        recurrence,
+        subTasks
     });
     res.status(201).json(task);
 };
@@ -44,7 +47,7 @@ export const deleteTask = async (req, res) => {
 // @access Private
 export const updateTask = async (req, res) => {
   try {
-    const { title, description, timeSpent, category, date } = req.body;
+    const { title, description, timeSpent, category, date, priority, recurrence, subTasks } = req.body;
 
     const task = await Task.findById(req.params.id);
 
@@ -58,10 +61,13 @@ export const updateTask = async (req, res) => {
     }
 
     task.title = title || task.title;
-    task.description = description || task.description;
+    task.description = description !== undefined ? description : task.description;
     task.timeSpent = timeSpent ?? task.timeSpent;
     task.category = category || task.category;
     task.date = date || task.date;
+    if (priority) task.priority = priority;
+    if (recurrence) task.recurrence = recurrence;
+    if (subTasks !== undefined) task.subTasks = subTasks;
 
     const updatedTask = await task.save();
     res.json(updatedTask);
