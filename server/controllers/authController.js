@@ -1,4 +1,6 @@
 import User from "../models/user.js";
+import Task from "../models/task.js";
+import Goal from "../models/goal.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
