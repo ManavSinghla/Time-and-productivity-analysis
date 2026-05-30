@@ -73,3 +73,26 @@ export const deleteAccount = async () => {
   });
   return res.json();
 };
+
+export const addFriend = async (email) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/friends/add`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ email }),
+  });
+  return res.json();
+};
+
+export const fetchLeaderboard = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_URL}/leaderboard`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return res.json();
+};

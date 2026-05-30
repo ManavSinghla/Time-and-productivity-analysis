@@ -166,3 +166,95 @@ export const deleteAccount = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// ADD FRIEND BY EMAIL
+export const addFriend = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const friendUser = await User.findOne({ email: email.toLowerCase().trim() });
+    if (!friendUser) {
+      return res.status(404).json({ message: "No user found with this email" });
+    }
+
+    if (friendUser._id.toString() === req.user.toString()) {
+      return res.status(400).json({ message: "You cannot add yourself as a friend" });
+    }
+
+    const currentUser = await User.findById(req.user);
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (currentUser.friends.includes(friendUser._id)) {
+      return res.status(400).json({ message: "User is already your friend" });
+    }
+
+    currentUser.friends.push(friendUser._id);
+    await currentUser.save();
+
+    // Mutual addition for seamless mutual leaderboard comparison
+    if (!friendUser.friends.includes(currentUser._id)) {
+      friendUser.friends.push(currentUser._id);
+      await friendUser.save();
+    }
+
+    res.json({ message: `Successfully added ${friendUser.name} as a friend!` });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET LEADERBOARD
+export const getLeaderboard = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.user).populate("friends", "name email");
+    if (!currentUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const usersToCompare = [
+      { id: currentUser._id, name: currentUser.name + " (You)", isUser: true },
+      ...currentUser.friends.map(f => ({ id: f._id, name: f.name, isUser: false }))
+    ];
+
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+    startOfWeek.setDate(diff);
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const leaderboardData = await Promise.all(usersToCompare.map(async (u) => {
+      const tasks = await Task.find({
+        user: u.id,
+        date: { $gte: startOfWeek }
+      });
+
+      const totalMinutes = tasks.reduce((sum, task) => sum + task.timeSpent, 0);
+      const activeDays = new Set(tasks.map(t => new Date(t.date).toDateString()));
+
+      return {
+        id: u.id,
+        name: u.name,
+        score: totalMinutes,
+        streak: activeDays.size,
+        isUser: u.isUser
+      };
+    }));
+
+    leaderboardData.sort((a, b) => b.score - a.score);
+
+    const rankedLeaderboard = leaderboardData.map((item, index) => ({
+      ...item,
+      rank: index + 1
+    }));
+
+    res.json(rankedLeaderboard);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

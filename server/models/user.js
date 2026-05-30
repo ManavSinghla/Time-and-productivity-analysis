@@ -18,7 +18,13 @@ const userSchema = new mongoose.Schema(
     preferences: {
       defaultCategory: { type: String, default: "Study" },
       dailyGoal: { type: Number, default: 120 }
-    }
+    },
+    friends: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+      }
+    ]
   },
   { timestamps: true }
 );

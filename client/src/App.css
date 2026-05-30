@@ -99,7 +99,7 @@ body {
 .form-input:focus, .form-select:focus {
   outline: none;
   border-color: var(--accent-indigo);
-  background: white;
+  background: var(--card-bg);
   box-shadow: 0 0 0 4px rgba(129, 140, 248, 0.1);
 }
 .form-label {
@@ -125,10 +125,11 @@ body {
 }
 .btn-primary {
   background: var(--text-primary);
-  color: white;
+  color: var(--bg-color);
 }
 .btn-primary:hover {
-  background: #374151;
+  background: var(--text-secondary);
+  color: var(--bg-color);
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
 }
@@ -414,3 +415,173 @@ body {
   font-weight: 600;
   border-left: 4px solid #22c55e;
 }
+
+/* React Big Calendar Dark Mode Overrides */
+.theme-dark .rbc-calendar { color: var(--text-primary); }
+.theme-dark .rbc-month-view, .theme-dark .rbc-time-view, .theme-dark .rbc-agenda-view { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+.theme-dark .rbc-header { border-bottom: 1px solid var(--border-color); border-left: 1px solid var(--border-color); color: var(--text-secondary); padding: 8px 0; font-weight: 700; }
+.theme-dark .rbc-day-bg { border-left: 1px solid var(--border-color); }
+.theme-dark .rbc-month-row { border-top: 1px solid var(--border-color); }
+.theme-dark .rbc-off-range-bg { background: rgba(0, 0, 0, 0.15); }
+.theme-dark .rbc-today { background: rgba(129, 140, 248, 0.08); }
+.theme-dark .rbc-time-content { border-top: 1px solid var(--border-color); }
+.theme-dark .rbc-timeslot-group { border-bottom: 1px solid var(--border-color); }
+.theme-dark .rbc-day-slot .rbc-time-slot { border-top: 1px solid var(--border-color); }
+.theme-dark .rbc-time-header-content { border-left: 1px solid var(--border-color); }
+.theme-dark .rbc-event { background-color: var(--accent-indigo); }
+.theme-dark .rbc-agenda-date-cell, .theme-dark .rbc-agenda-time-cell { border-right: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); }
+
+/* Calendar UI Improvements */
+.rbc-calendar {
+  font-family: inherit;
+}
+.rbc-toolbar button {
+  color: var(--text-primary);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1.2rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-sm);
+}
+.rbc-toolbar button:hover {
+  background: var(--hover-bg);
+  transform: translateY(-1px);
+}
+.rbc-toolbar button:active {
+  transform: translateY(0);
+}
+.rbc-toolbar button.rbc-active {
+  background: var(--accent-gradient);
+  color: white !important;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
+}
+.rbc-toolbar button.rbc-active:hover {
+  background: var(--accent-gradient);
+}
+.rbc-toolbar .rbc-toolbar-label {
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+}
+.rbc-event {
+  padding: 4px 8px;
+  border-radius: 8px !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  border: none !important;
+}
+.rbc-event:hover {
+  transform: scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  filter: brightness(1.05);
+}
+.rbc-today {
+  background: rgba(96, 165, 250, 0.05);
+}
+
+/* Premium Glassmorphic Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(17, 24, 39, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: modalFadeIn 0.3s ease-out;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  animation: modalSlideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+.modal-close-btn:hover {
+  color: var(--text-primary);
+  background: var(--hover-bg);
+}
+
+.modal-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.detail-row {
+  margin-bottom: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.detail-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
