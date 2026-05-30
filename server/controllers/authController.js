@@ -146,8 +146,6 @@ export const changePassword = async (req, res) => {
 };
 
 // DELETE ACCOUNT
-import Task from "../models/task.js";
-import Goal from "../models/goal.js";
 
 export const deleteAccount = async (req, res) => {
   try {
